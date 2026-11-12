@@ -1,0 +1,43 @@
+---
+import About from '@/components/home/About.astro'
+import Benefits from '@/components/home/Benefits.astro'
+import CategoryGrid from '@/components/home/CategoryGrid.astro'
+import Hero from '@/components/home/Hero.astro'
+import ProductSection from '@/components/home/ProductSection.astro'
+import ShippingInfo from '@/components/home/ShippingInfo.astro'
+import MainLayout from '@/layouts/MainLayout.astro'
+import { getBusiness } from '@/services/supabase/business'
+import { getCategories } from '@/services/supabase/categories'
+import { getCatalog } from '@/services/supabase/products'
+
+// Si una consulta falla, su sección no se muestra y el resto de la página sigue en pie.
+async function orEmpty<T>(label: string, promise: Promise<T[]>): Promise<T[]> {
+  try {
+    return await promise
+  } catch (error) {
+    console.error(`[inicio] ${label}:`, error)
+    return []
+  }
+}
+
+const [business, categories, featured, recent] = await Promise.all([
+  getBusiness(),
+  orEmpty('categorías', getCategories()),
+  orEmpty('destacados', getCatalog({ featured: true, limit: 4 }).then((page) => page.items)),
+  orEmpty('recientes', getCatalog({ sort: 'recientes', limit: 8 }).then((page) => page.items)),
+])
+---
+
+<MainLayout>
+  <Hero />
+  {categories.length > 0 && <CategoryGrid categories={categories} />}
+  {featured.length > 0 && (
+    <ProductSection eyebrow="Favoritos" title="Productos destacados" products={featured} href="/catalogo" tinted />
+  )}
+  <About businessName={business.business_name} />
+  {recent.length > 0 && (
+    <ProductSection eyebrow="Recién llegados" title="Lo más nuevo" products={recent} href="/catalogo?orden=recientes" />
+  )}
+  <Benefits />
+  <ShippingInfo businessName={business.business_name} />
+</MainLayout>

@@ -1,0 +1,123 @@
+@import 'tailwindcss';
+@import '@fontsource-variable/fraunces';
+@import '@fontsource-variable/fraunces/wght-italic.css';
+@import '@fontsource-variable/dm-sans';
+
+/* Sistema de diseño: neutros cálidos, un acento terracota y un secundario salvia. */
+@theme {
+  --font-display: 'Fraunces Variable', Georgia, 'Times New Roman', serif;
+  --font-sans: 'DM Sans Variable', ui-sans-serif, system-ui, sans-serif;
+
+  --color-cream: #faf6f0; /* fondo */
+  --color-sand: #efe6da; /* superficies y marcos de foto */
+  --color-linen: #e2d6c6; /* bordes */
+  --color-ink: #2b2622; /* texto */
+  --color-stone: #6b625a; /* texto secundario (AA sobre cream) */
+  --color-clay: #9c4f36; /* acento: botones y enlaces (AA con texto blanco) */
+  --color-clay-deep: #833f29;
+  --color-clay-soft: #f3ddd3;
+  --color-sage: #5f6e57;
+  --color-sage-soft: #e3e8dd;
+
+  --radius-card: 1.25rem;
+  --ease-soft: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    background-color: var(--color-cream);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-display);
+    font-weight: 500;
+    letter-spacing: -0.015em;
+    text-wrap: balance;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-clay);
+    outline-offset: 3px;
+    border-radius: 4px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+@layer components {
+  .container-page {
+    width: 100%;
+    max-width: 76rem;
+    margin-inline: auto;
+    padding-inline: 1.25rem;
+  }
+  @media (min-width: 640px) {
+    .container-page {
+      padding-inline: 2rem;
+    }
+  }
+
+  .btn {
+    display: inline-flex;
+    min-height: 2.75rem;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border-radius: 999px;
+    padding: 0.625rem 1.5rem;
+    font-size: 0.9375rem;
+    font-weight: 500;
+    transition:
+      background-color 180ms var(--ease-soft),
+      color 180ms var(--ease-soft),
+      border-color 180ms var(--ease-soft),
+      transform 180ms var(--ease-soft);
+  }
+  .btn:active {
+    transform: scale(0.98);
+  }
+  .btn-primary {
+    background-color: var(--color-clay);
+    color: #fff;
+  }
+  .btn-primary:hover {
+    background-color: var(--color-clay-deep);
+  }
+  .btn-outline {
+    border: 1px solid var(--color-ink);
+    color: var(--color-ink);
+  }
+  .btn-outline:hover {
+    background-color: var(--color-ink);
+    color: var(--color-cream);
+  }
+
+  /* Rótulo pequeño en mayúsculas sobre los títulos de sección. */
+  .eyebrow {
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--color-clay);
+  }
+}

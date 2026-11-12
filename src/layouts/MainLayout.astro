@@ -1,0 +1,54 @@
+---
+import '@/styles/global.css'
+import Footer from '@/components/layout/Footer.astro'
+import Header from '@/components/layout/Header.astro'
+import WhatsAppFab from '@/components/layout/WhatsAppFab.astro'
+import { site } from '@/config/site'
+import { getBusiness } from '@/services/supabase/business'
+
+interface Props {
+  /** Título de la página; se le agrega el nombre del negocio. Sin él se usa nombre + lema. */
+  title?: string
+  description?: string
+  /** URL absoluta de la imagen para compartir en redes. */
+  image?: string
+}
+
+const business = await getBusiness()
+const name = business.business_name
+const { title, description = site.description, image } = Astro.props
+const fullTitle = title ? `${title} · ${name}` : `${name} · ${site.tagline}`
+const canonical = new URL(Astro.url.pathname, Astro.site)
+---
+
+<!doctype html>
+<html lang="es-CO">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="theme-color" content="#faf6f0" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={name} />
+    <meta property="og:locale" content="es_CO" />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    {image && <meta property="og:image" content={image} />}
+    <meta name="twitter:card" content={image ? 'summary_large_image' : 'summary'} />
+  </head>
+  <body class="flex min-h-dvh flex-col">
+    <a href="#contenido" class="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 focus:rounded-full focus:bg-ink focus:px-4 focus:py-2 focus:text-cream">
+      Saltar al contenido
+    </a>
+    <Header businessName={name} />
+    <main id="contenido" class="flex-1">
+      <slot />
+    </main>
+    <Footer business={business} />
+    <WhatsAppFab businessName={name} />
+  </body>
+</html>

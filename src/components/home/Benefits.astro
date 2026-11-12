@@ -1,0 +1,25 @@
+---
+import { Gift, MessageCircleHeart, Store, Truck } from '@lucide/astro'
+
+const benefits = [
+  { icon: Gift, title: 'Detalles con encanto', text: 'Piezas escogidas una a una para decorar y regalar.' },
+  { icon: MessageCircleHeart, title: 'Atención directa', text: 'Te respondemos por WhatsApp y resolvemos tus dudas.' },
+  { icon: Truck, title: 'Envíos en Bogotá', text: 'Llevamos tu pedido a domicilio en toda la ciudad.' },
+  { icon: Store, title: 'Recoge en tienda', text: 'Pasa por tu pedido cuando te quede bien, sin costo.' },
+]
+---
+
+<section class="container-page py-12 sm:py-16" aria-labelledby="beneficios-titulo">
+  <h2 id="beneficios-titulo" class="sr-only">Por qué comprar con nosotros</h2>
+  <ul class="grid grid-cols-2 gap-x-6 gap-y-10 lg:grid-cols-4">
+    {benefits.map(({ icon: Icon, title, text }) => (
+      <li class="flex flex-col items-center gap-3 text-center">
+        <span class="grid size-14 place-items-center rounded-full bg-clay-soft text-clay">
+          <Icon class="size-6" stroke-width={1.5} />
+        </span>
+        <h3 class="font-display text-lg">{title}</h3>
+        <p class="max-w-[15rem] text-sm leading-relaxed text-stone">{text}</p>
+      </li>
+    ))}
+  </ul>
+</section>

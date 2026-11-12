@@ -1,0 +1,50 @@
+---
+import { MapPin, Store, Truck } from '@lucide/astro'
+import SocialIcon from '@/components/common/SocialIcon.astro'
+import { site } from '@/config/site'
+import { whatsappLink } from '@/lib/whatsapp'
+
+interface Props {
+  businessName: string
+}
+const whatsapp = whatsappLink(`Hola ${Astro.props.businessName}, quiero saber el costo de envío a mi barrio.`)
+---
+
+<section id="envios" class="container-page scroll-mt-20 py-12 sm:py-16">
+  <div class="grid overflow-hidden rounded-[2rem] bg-sage-soft md:grid-cols-2">
+    <div class="flex flex-col items-start gap-5 p-8 sm:p-12">
+      <p class="eyebrow !text-sage">Entregas</p>
+      <h2 class="text-3xl sm:text-4xl">{site.shipping.summary}</h2>
+      <p class="leading-relaxed text-ink/80">{site.shipping.detail}</p>
+      {whatsapp && (
+        <a href={whatsapp} target="_blank" rel="noopener noreferrer" class="btn btn-primary mt-2">
+          <SocialIcon name="whatsapp" class="size-5" />
+          Consultar por WhatsApp
+        </a>
+      )}
+    </div>
+    <ul class="flex flex-col justify-center gap-6 border-t border-sage/20 p-8 sm:p-12 md:border-t-0 md:border-l">
+      <li class="flex gap-4">
+        <Truck class="mt-0.5 size-6 shrink-0 text-sage" stroke-width={1.5} />
+        <div>
+          <h3 class="font-sans text-base font-medium tracking-normal">A domicilio</h3>
+          <p class="text-sm leading-relaxed text-ink/75">Costo del envío: <strong class="font-medium">{site.shipping.costLabel.toLowerCase()}</strong> según tu ubicación.</p>
+        </div>
+      </li>
+      <li class="flex gap-4">
+        <Store class="mt-0.5 size-6 shrink-0 text-sage" stroke-width={1.5} />
+        <div>
+          <h3 class="font-sans text-base font-medium tracking-normal">Recoge en tienda</h3>
+          <p class="text-sm leading-relaxed text-ink/75">{site.shipping.pickup}</p>
+        </div>
+      </li>
+      <li class="flex gap-4">
+        <MapPin class="mt-0.5 size-6 shrink-0 text-sage" stroke-width={1.5} />
+        <div>
+          <h3 class="font-sans text-base font-medium tracking-normal">Sin pagos en línea</h3>
+          <p class="text-sm leading-relaxed text-ink/75">Armas tu pedido aquí y lo confirmamos contigo por WhatsApp: disponibilidad, entrega y forma de pago.</p>
+        </div>
+      </li>
+    </ul>
+  </div>
+</section>

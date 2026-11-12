@@ -1,0 +1,15 @@
+---
+import MainLayout from '@/layouts/MainLayout.astro'
+---
+
+<MainLayout title="Página no encontrada" description="La página que buscas no existe o ya no está disponible.">
+  <section class="container-page flex flex-col items-center gap-5 py-24 text-center sm:py-32">
+    <p class="eyebrow">Error 404</p>
+    <h1 class="text-4xl sm:text-5xl">No encontramos esta página</h1>
+    <p class="max-w-md text-lg text-stone">Puede que el producto ya no esté disponible o que el enlace haya cambiado.</p>
+    <div class="mt-2 flex flex-wrap justify-center gap-3">
+      <a href="/catalogo" class="btn btn-primary">Ver el catálogo</a>
+      <a href="/" class="btn btn-outline">Ir al inicio</a>
+    </div>
+  </section>
+</MainLayout>

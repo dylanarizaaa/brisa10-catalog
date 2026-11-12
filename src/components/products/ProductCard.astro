@@ -1,0 +1,53 @@
+---
+import { ImageOff } from '@lucide/astro'
+import { formatCurrency } from '@/lib/formatCurrency'
+import { productImageUrl } from '@/services/supabase/client'
+import type { ProductCard } from '@/types/product'
+import AvailabilityBadge from './AvailabilityBadge.astro'
+
+interface Props {
+  product: ProductCard
+  /** Las primeras tarjetas visibles cargan la foto de inmediato; el resto, al acercarse. */
+  eager?: boolean
+}
+const { product, eager = false } = Astro.props
+const soldOut = product.availability === 'agotado'
+---
+
+<article class="group relative flex flex-col gap-3">
+  <div class="relative aspect-[4/5] overflow-hidden rounded-[var(--radius-card)] bg-sand">
+    {product.main_image_path ? (
+      <img
+        src={productImageUrl(product.main_image_path)}
+        alt=""
+        width="600"
+        height="750"
+        loading={eager ? 'eager' : 'lazy'}
+        decoding="async"
+        class:list={[
+          'size-full object-cover transition-transform duration-500 ease-[var(--ease-soft)] group-hover:scale-[1.04]',
+          soldOut && 'opacity-60 grayscale-[35%]',
+        ]}
+      />
+    ) : (
+      <div class="grid size-full place-items-center text-linen">
+        <ImageOff class="size-10" />
+      </div>
+    )}
+    {product.availability !== 'disponible' && (
+      <div class="absolute top-3 left-3">
+        <AvailabilityBadge availability={product.availability} />
+      </div>
+    )}
+  </div>
+  <div class="flex flex-col gap-1 px-1">
+    <p class="text-xs tracking-wide text-stone uppercase">{product.category_name}</p>
+    <h3 class="font-sans text-[0.9375rem] leading-snug font-medium tracking-normal">
+      <!-- El enlace cubre toda la tarjeta (::after), así el área táctil es la tarjeta completa. -->
+      <a href={`/productos/${product.slug}`} class="after:absolute after:inset-0 after:rounded-[var(--radius-card)]">
+        {product.name}
+      </a>
+    </h3>
+    <p class:list={['text-[0.9375rem]', soldOut ? 'text-stone' : 'text-ink']}>{formatCurrency(product.price)}</p>
+  </div>
+</article>

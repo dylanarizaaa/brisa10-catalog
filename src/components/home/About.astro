@@ -1,0 +1,20 @@
+---
+interface Props {
+  businessName: string
+}
+const { businessName } = Astro.props
+---
+
+<!-- PENDIENTE: ajustar este texto con la historia real del negocio. -->
+<section class="container-page py-14 sm:py-20">
+  <div class="mx-auto flex max-w-3xl flex-col items-center gap-5 text-center">
+    <p class="eyebrow">Sobre {businessName}</p>
+    <h2 class="text-3xl leading-tight sm:text-[2.6rem]">
+      Una tienda de barrio con cosas lindas para tu casa y para regalar
+    </h2>
+    <p class="max-w-2xl text-lg leading-relaxed text-stone">
+      Elegimos cada pieza una por una: cerámicas, peluches, decoración y detalles que se notan. Aquí puedes ver
+      todo lo que tenemos en la tienda, armar tu pedido y escribirnos por WhatsApp para confirmarlo.
+    </p>
+  </div>
+</section>

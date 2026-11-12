@@ -1,0 +1,21 @@
+---
+import SectionHeading from '@/components/common/SectionHeading.astro'
+import ProductGrid from '@/components/products/ProductGrid.astro'
+import type { ProductCard } from '@/types/product'
+
+interface Props {
+  eyebrow: string
+  title: string
+  products: ProductCard[]
+  href?: string
+  tinted?: boolean
+}
+const { eyebrow, title, products, href = '/catalogo', tinted = false } = Astro.props
+---
+
+<section class:list={['py-12 sm:py-16', tinted && 'bg-sand/60']}>
+  <div class="container-page">
+    <SectionHeading eyebrow={eyebrow} title={title} href={href} />
+    <ProductGrid products={products} />
+  </div>
+</section>

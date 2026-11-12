@@ -1,0 +1,82 @@
+---
+import { Mail, MapPin, Phone } from '@lucide/astro'
+import SocialIcon from '@/components/common/SocialIcon.astro'
+import { navLinks, site } from '@/config/site'
+import { whatsappLink } from '@/lib/whatsapp'
+import type { Business } from '@/types/business'
+import Logo from './Logo.astro'
+
+interface Props {
+  business: Business
+}
+const { business } = Astro.props
+const whatsapp = whatsappLink(`Hola ${business.business_name}, quiero hacer una consulta.`)
+const socials = [
+  { name: 'instagram', label: 'Instagram', href: site.social.instagram },
+  { name: 'tiktok', label: 'TikTok', href: site.social.tiktok },
+  { name: 'facebook', label: 'Facebook', href: site.social.facebook },
+  { name: 'whatsapp', label: 'WhatsApp', href: whatsapp ?? '' },
+] as const
+---
+
+<footer id="contacto" class="mt-24 scroll-mt-20 bg-ink text-cream">
+  <div class="container-page grid gap-12 py-14 sm:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr]">
+    <div class="flex flex-col gap-4">
+      <Logo name={business.business_name} class="!text-cream" />
+      <p class="max-w-xs text-sm leading-relaxed text-cream/70">{site.tagline}.</p>
+      <ul class="mt-2 flex gap-1">
+        {socials.filter((social) => social.href).map((social) => (
+          <li>
+            <a
+              href={social.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={`${social.label} de ${business.business_name}`}
+              class="grid size-11 place-items-center rounded-full border border-cream/20 transition-colors hover:bg-cream hover:text-ink"
+            >
+              <SocialIcon name={social.name} />
+            </a>
+          </li>
+        ))}
+      </ul>
+    </div>
+
+    <nav aria-label="Pie de página">
+      <h2 class="font-sans text-xs font-semibold tracking-[0.16em] text-cream/60 uppercase">Tienda</h2>
+      <ul class="mt-4 flex flex-col gap-1 text-sm">
+        {navLinks.map((link) => (
+          <li>
+            <a href={link.href} class="inline-flex min-h-9 items-center text-cream/85 hover:text-cream hover:underline">{link.label}</a>
+          </li>
+        ))}
+      </ul>
+    </nav>
+
+    <div>
+      <h2 class="font-sans text-xs font-semibold tracking-[0.16em] text-cream/60 uppercase">Contacto</h2>
+      <ul class="mt-4 flex flex-col gap-3 text-sm text-cream/85">
+        <li class="flex gap-3">
+          <MapPin class="mt-0.5 size-4 shrink-0 text-cream/60" />
+          <span>{business.address ? `${business.address}, ${site.city}` : `${site.city}, Colombia`}</span>
+        </li>
+        {business.phone && (
+          <li class="flex gap-3">
+            <Phone class="mt-0.5 size-4 shrink-0 text-cream/60" />
+            <a href={`tel:${business.phone.replace(/[^\d+]/g, '')}`} class="hover:underline">{business.phone}</a>
+          </li>
+        )}
+        {business.email && (
+          <li class="flex gap-3">
+            <Mail class="mt-0.5 size-4 shrink-0 text-cream/60" />
+            <a href={`mailto:${business.email}`} class="break-all hover:underline">{business.email}</a>
+          </li>
+        )}
+      </ul>
+    </div>
+  </div>
+  <div class="border-t border-cream/15">
+    <p class="container-page py-5 text-xs text-cream/60">
+      © {new Date().getFullYear()} {business.business_name}. Los pedidos se confirman por WhatsApp; este sitio no procesa pagos.
+    </p>
+  </div>
+</footer>

@@ -1,0 +1,24 @@
+---
+import type { Availability } from '@/types/product'
+
+interface Props {
+  availability: Availability
+}
+const { availability } = Astro.props
+const labels: Record<Availability, string> = {
+  disponible: 'Disponible',
+  ultimas_unidades: 'Últimas unidades',
+  agotado: 'Agotado',
+}
+---
+
+<span
+  class:list={[
+    'inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium',
+    availability === 'disponible' && 'bg-sage-soft text-sage',
+    availability === 'ultimas_unidades' && 'bg-clay-soft text-clay-deep',
+    availability === 'agotado' && 'bg-ink text-cream',
+  ]}
+>
+  {labels[availability]}
+</span>

@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 1000" role="img" aria-label="Ilustración provisional: jarrones de cerámica y un ramo sobre una repisa">
+  <!-- PROVISIONAL: reemplazar por una fotografía real de los productos (src/assets/hero.jpg) y actualizar Hero.astro -->
+  <rect width="800" height="1000" fill="#EADFD0"/>
+  <path d="M170 1000V470a230 230 0 0 1 460 0v530Z" fill="#F6EEE3"/>
+  <circle cx="610" cy="200" r="70" fill="#E3B79F" opacity=".7"/>
+  <rect y="800" width="800" height="200" fill="#D9C8B4"/>
+  <rect y="800" width="800" height="10" fill="#C9B59D"/>
+  <!-- ramo -->
+  <g stroke="#5F6E57" stroke-width="7" fill="none" stroke-linecap="round">
+    <path d="M330 560C320 470 290 400 250 350"/>
+    <path d="M335 560C340 450 350 380 370 300"/>
+    <path d="M342 560C365 480 400 430 450 390"/>
+  </g>
+  <g fill="#7D8B74">
+    <ellipse cx="238" cy="338" rx="26" ry="48" transform="rotate(-35 238 338)"/>
+    <ellipse cx="290" cy="420" rx="20" ry="40" transform="rotate(-55 290 420)"/>
+    <ellipse cx="375" cy="282" rx="26" ry="52" transform="rotate(12 375 282)"/>
+    <ellipse cx="352" cy="400" rx="18" ry="38" transform="rotate(40 352 400)"/>
+    <ellipse cx="462" cy="378" rx="24" ry="46" transform="rotate(52 462 378)"/>
+  </g>
+  <!-- jarrón grande -->
+  <path d="M290 560h92c-6 34 44 70 44 140 0 66-40 100-90 100s-90-34-90-100c0-70 50-106 44-140Z" fill="#9C4F36"/>
+  <rect x="284" y="548" width="104" height="18" rx="9" fill="#833F29"/>
+  <path d="M262 690c20 14 128 14 148 0" stroke="#F3DDD3" stroke-width="6" fill="none" opacity=".6"/>
+  <!-- jarrón pequeño -->
+  <path d="M500 660h60c-4 20 30 44 30 84 0 36-26 56-60 56s-60-20-60-56c0-40 34-64 30-84Z" fill="#F6EEE3" stroke="#C9B59D" stroke-width="4"/>
+  <!-- cuenco -->
+  <path d="M130 740h130c0 40-28 60-65 60s-65-20-65-60Z" fill="#5F6E57"/>
+  <!-- vela -->
+  <rect x="640" y="700" width="56" height="100" rx="6" fill="#FAF6F0"/>
+  <path d="M668 700v-18" stroke="#2B2622" stroke-width="4" stroke-linecap="round"/>
+  <path d="M668 682c-12-14 0-24 0-36 10 12 12 24 0 36Z" fill="#E0A458"/>
+</svg>

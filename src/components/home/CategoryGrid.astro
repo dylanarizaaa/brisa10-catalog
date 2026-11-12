@@ -1,0 +1,43 @@
+---
+import SectionHeading from '@/components/common/SectionHeading.astro'
+import { productImageUrl } from '@/services/supabase/client'
+import type { Category } from '@/types/category'
+
+interface Props {
+  categories: Category[]
+}
+const { categories } = Astro.props
+// Sin foto, cada categoría toma un tono de la paleta.
+const tones = ['bg-clay-soft', 'bg-sage-soft', 'bg-sand', 'bg-linen']
+---
+
+<section class="container-page py-12 sm:py-16">
+  <SectionHeading eyebrow="Explora" title="Compra por categoría" href="/catalogo" linkLabel="Todo el catálogo" />
+  <ul class="-mx-5 flex snap-x snap-mandatory gap-4 overflow-x-auto px-5 pb-2 sm:mx-0 sm:flex-wrap sm:justify-center sm:gap-8 sm:overflow-visible sm:px-0">
+    {categories.map((category, index) => (
+      <li class="w-[44vw] max-w-56 shrink-0 snap-start sm:w-40 lg:w-48">
+        <a href={`/catalogo?categoria=${category.slug}`} class="group flex flex-col gap-3">
+          <div class:list={['aspect-square overflow-hidden rounded-full', tones[index % tones.length]]}>
+            {category.image_path && (
+              <img
+                src={productImageUrl(category.image_path)}
+                alt=""
+                width="400"
+                height="400"
+                loading="lazy"
+                decoding="async"
+                class="size-full object-cover transition-transform duration-500 ease-[var(--ease-soft)] group-hover:scale-105"
+              />
+            )}
+          </div>
+          <div class="text-center">
+            <h3 class="font-display text-lg group-hover:text-clay">{category.name}</h3>
+            <p class="text-xs text-stone">
+              {category.product_count} {category.product_count === 1 ? 'producto' : 'productos'}
+            </p>
+          </div>
+        </a>
+      </li>
+    ))}
+  </ul>
+</section>
