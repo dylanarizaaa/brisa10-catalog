@@ -6,11 +6,13 @@ interface Props {
   products: Product[]
   /** Cuántas fotos iniciales se cargan sin esperar (las que se ven al abrir la página). */
   eagerCount?: number
+  /** Columnas en escritorio: 4 a página completa, 3 cuando hay filtros laterales. */
+  columns?: 3 | 4
 }
-const { products, eagerCount = 0 } = Astro.props
+const { products, eagerCount = 0, columns = 4 } = Astro.props
 ---
 
-<ul class="grid grid-cols-2 gap-x-4 gap-y-8 sm:gap-x-6 sm:gap-y-10 md:grid-cols-3 lg:grid-cols-4">
+<ul class:list={['grid grid-cols-2 gap-x-4 gap-y-8 sm:gap-x-6 sm:gap-y-10 md:grid-cols-3', columns === 4 ? 'lg:grid-cols-4' : 'xl:grid-cols-3']}>
   {products.map((product, index) => (
     <li>
       <ProductCard product={product} eager={index < eagerCount} />

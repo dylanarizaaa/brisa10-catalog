@@ -12,13 +12,18 @@ interface Props {
   description?: string
   /** URL absoluta de la imagen para compartir en redes. */
   image?: string
+  /** Ruta canónica (con sus parámetros) cuando no es simplemente la ruta actual. */
+  canonicalPath?: string
+  ogType?: 'website' | 'product'
+  /** Páginas que no deben indexarse (búsquedas, páginas de error). */
+  noindex?: boolean
 }
 
 const business = await getBusiness()
 const name = business.business_name
-const { title, description = site.description, image } = Astro.props
+const { title, description = site.description, image, canonicalPath, ogType = 'website', noindex = false } = Astro.props
 const fullTitle = title ? `${title} · ${name}` : `${name} · ${site.tagline}`
-const canonical = new URL(Astro.url.pathname, Astro.site)
+const canonical = new URL(canonicalPath ?? Astro.url.pathname, Astro.site)
 ---
 
 <!doctype html>
@@ -31,7 +36,8 @@ const canonical = new URL(Astro.url.pathname, Astro.site)
     <link rel="canonical" href={canonical} />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="theme-color" content="#faf6f0" />
-    <meta property="og:type" content="website" />
+    {noindex && <meta name="robots" content="noindex, follow" />}
+    <meta property="og:type" content={ogType} />
     <meta property="og:site_name" content={name} />
     <meta property="og:locale" content="es_CO" />
     <meta property="og:title" content={fullTitle} />
@@ -39,6 +45,7 @@ const canonical = new URL(Astro.url.pathname, Astro.site)
     <meta property="og:url" content={canonical} />
     {image && <meta property="og:image" content={image} />}
     <meta name="twitter:card" content={image ? 'summary_large_image' : 'summary'} />
+    <slot name="head" />
   </head>
   <body class="flex min-h-dvh flex-col">
     <a href="#contenido" class="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 focus:rounded-full focus:bg-ink focus:px-4 focus:py-2 focus:text-cream">

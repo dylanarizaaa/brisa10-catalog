@@ -45,8 +45,14 @@ const isCurrent = (href: string) => (href === '/' ? path === '/' : !href.include
       <a href="/catalogo" class="grid size-11 place-items-center rounded-full transition-colors hover:bg-sand" aria-label="Buscar en el catálogo">
         <Search class="size-5" />
       </a>
-      <a href="/carrito" class="grid size-11 place-items-center rounded-full transition-colors hover:bg-sand" aria-label="Ver carrito">
+      <a href="/carrito" class="relative grid size-11 place-items-center rounded-full transition-colors hover:bg-sand" aria-label="Ver carrito" data-cart-link>
         <ShoppingBag class="size-5" />
+        <span
+          data-cart-count
+          hidden
+          aria-hidden="true"
+          class="absolute top-1 right-0.5 grid h-[1.125rem] min-w-[1.125rem] place-items-center rounded-full bg-clay px-1 text-[0.6875rem] leading-none font-semibold text-white"
+        ></span>
       </a>
     </div>
   </div>
@@ -114,6 +120,21 @@ const isCurrent = (href: string) => (href === '/' ? path === '/' : !href.include
 
 <script>
   // Al tocar un enlace del menú (p. ej. un ancla de la misma página) se cierra el panel.
+  import { cartCount, onCartChange } from '@/lib/cart'
+
+  // Contador del carrito: vive en localStorage, así que se pinta en el navegador.
+  const link = document.querySelector<HTMLElement>('[data-cart-link]')
+  const badge = document.querySelector<HTMLElement>('[data-cart-count]')
+  function renderCartCount() {
+    if (!link || !badge) return
+    const count = cartCount()
+    badge.hidden = count === 0
+    badge.textContent = count > 99 ? '99+' : String(count)
+    link.setAttribute('aria-label', count === 0 ? 'Ver carrito' : `Ver carrito (${count} ${count === 1 ? 'producto' : 'productos'})`)
+  }
+  renderCartCount()
+  onCartChange(renderCartCount)
+
   const menu = document.getElementById('mobile-menu')
   menu?.addEventListener('click', (event) => {
     if ((event.target as HTMLElement).closest('a')) menu.hidePopover()

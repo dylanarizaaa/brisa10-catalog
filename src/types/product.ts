@@ -23,3 +23,13 @@ export interface CatalogPage {
 }
 
 export type CatalogSort = 'recientes' | 'precio_asc' | 'precio_desc'
+
+/** Detalle de un producto: la tarjeta más descripción, galería y relacionados. */
+export interface ProductDetail extends ProductCard {
+  description: string | null
+  /** Rutas en el bucket product-images, en orden; la primera es la principal. */
+  images: string[]
+  related: ProductCard[]
+  created_at: string
+  updated_at: string
+}

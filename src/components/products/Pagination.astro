@@ -1,0 +1,43 @@
+---
+import { ChevronLeft, ChevronRight } from '@lucide/astro'
+import { catalogUrl, type CatalogParams } from '@/lib/catalogUrl'
+
+interface Props {
+  params: CatalogParams
+  pageCount: number
+}
+const { params, pageCount } = Astro.props
+const page = params.pagina
+const link = 'btn btn-outline'
+const off = 'btn pointer-events-none border border-linen text-stone/60'
+---
+
+{pageCount > 1 && (
+  <nav aria-label="Páginas del catálogo" class="mt-12 flex items-center justify-between gap-4">
+    {page > 1 ? (
+      <a href={catalogUrl({ ...params, pagina: page - 1 })} rel="prev" class={link}>
+        <ChevronLeft class="size-4" />
+        Anterior
+      </a>
+    ) : (
+      <span class={off} aria-hidden="true">
+        <ChevronLeft class="size-4" />
+        Anterior
+      </span>
+    )}
+    <p class="text-sm text-stone">
+      Página <span class="font-medium text-ink">{page}</span> de {pageCount}
+    </p>
+    {page < pageCount ? (
+      <a href={catalogUrl({ ...params, pagina: page + 1 })} rel="next" class={link}>
+        Siguiente
+        <ChevronRight class="size-4" />
+      </a>
+    ) : (
+      <span class={off} aria-hidden="true">
+        Siguiente
+        <ChevronRight class="size-4" />
+      </span>
+    )}
+  </nav>
+)}

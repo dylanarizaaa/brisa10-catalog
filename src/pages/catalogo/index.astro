@@ -1,0 +1,137 @@
+---
+import { PackageSearch, TriangleAlert, X } from '@lucide/astro'
+import CatalogFilters from '@/components/products/CatalogFilters.astro'
+import Pagination from '@/components/products/Pagination.astro'
+import ProductGrid from '@/components/products/ProductGrid.astro'
+import MainLayout from '@/layouts/MainLayout.astro'
+import { CATALOG_PAGE_SIZE, catalogUrl, parseCatalogParams } from '@/lib/catalogUrl'
+import { getCategories } from '@/services/supabase/categories'
+import { getCatalog } from '@/services/supabase/products'
+import type { Category } from '@/types/category'
+import type { CatalogPage } from '@/types/product'
+
+const params = parseCatalogParams(Astro.url.searchParams)
+
+let categories: Category[] = []
+let page: CatalogPage | null = null
+try {
+  ;[categories, page] = await Promise.all([
+    getCategories().catch((error) => {
+      console.error('[catálogo] categorías:', error)
+      return []
+    }),
+    getCatalog({
+      search: params.q || undefined,
+      categorySlug: params.categoria || undefined,
+      sort: params.orden,
+      limit: CATALOG_PAGE_SIZE,
+      offset: (params.pagina - 1) * CATALOG_PAGE_SIZE,
+    }),
+  ])
+} catch (error) {
+  console.error('[catálogo] productos:', error)
+  // Un error no debe quedar guardado en la caché del CDN.
+  Astro.cache.set(false)
+  Astro.response.status = 503
+}
+
+const category = categories.find((item) => item.slug === params.categoria)
+const total = page?.total ?? 0
+const pageCount = Math.max(1, Math.ceil(total / CATALOG_PAGE_SIZE))
+const hasFilters = Boolean(params.q || params.categoria)
+const heading = category?.name ?? 'Catálogo'
+const title = params.q ? `Resultados para "${params.q}"` : category ? `${category.name}` : 'Catálogo'
+const description = category
+  ? `${category.name}: ${category.product_count} ${category.product_count === 1 ? 'producto' : 'productos'} disponibles en nuestra tienda de Bogotá. Haz tu pedido por WhatsApp.`
+  : 'Explora todos nuestros productos de decoración, cerámicas, peluches y regalos. Haz tu pedido por WhatsApp.'
+---
+
+<MainLayout
+  title={title}
+  description={description}
+  canonicalPath={catalogUrl({ categoria: category?.slug, pagina: params.pagina })}
+  noindex={Boolean(params.q) || !page}
+>
+  <div class="container-page pt-8 pb-4 sm:pt-12">
+    <nav aria-label="Ruta de navegación" class="mb-4 text-sm text-stone">
+      <ol class="flex flex-wrap items-center gap-2">
+        <li><a href="/" class="hover:text-ink hover:underline">Inicio</a></li>
+        <li aria-hidden="true">/</li>
+        {category ? (
+          <>
+            <li><a href="/catalogo" class="hover:text-ink hover:underline">Catálogo</a></li>
+            <li aria-hidden="true">/</li>
+            <li aria-current="page" class="text-ink">{category.name}</li>
+          </>
+        ) : (
+          <li aria-current="page" class="text-ink">Catálogo</li>
+        )}
+      </ol>
+    </nav>
+    <h1 class="text-4xl sm:text-5xl">{heading}</h1>
+  </div>
+
+  <div class="container-page grid grid-cols-[minmax(0,1fr)] gap-8 py-6 lg:grid-cols-[15rem_minmax(0,1fr)] lg:gap-12 lg:py-10">
+    <aside class="min-w-0 lg:sticky lg:top-24 lg:self-start">
+      <CatalogFilters params={params} categories={categories} />
+    </aside>
+
+    <section aria-label="Productos" class="min-w-0">
+      {!page ? (
+        <div class="flex flex-col items-center gap-4 rounded-[var(--radius-card)] bg-sand/60 px-6 py-16 text-center">
+          <TriangleAlert class="size-10 text-clay" stroke-width={1.5} />
+          <h2 class="text-2xl">No pudimos cargar el catálogo</h2>
+          <p class="max-w-sm text-stone">Puede ser un problema temporal de conexión. Inténtalo de nuevo en un momento.</p>
+          <a href={Astro.url.pathname + Astro.url.search} class="btn btn-primary">Reintentar</a>
+        </div>
+      ) : (
+        <>
+          <div class="mb-6 flex flex-wrap items-center gap-x-4 gap-y-2">
+            <p class="text-sm text-stone" aria-live="polite">
+              {total === 0 ? 'Sin resultados' : `${total} ${total === 1 ? 'producto' : 'productos'}`}
+              {params.q && (
+                <>
+                  {' '}para <span class="font-medium text-ink">"{params.q}"</span>
+                </>
+              )}
+            </p>
+            {hasFilters && (
+              <a href={catalogUrl({ orden: params.orden })} class="inline-flex min-h-9 items-center gap-1 text-sm font-medium text-clay hover:text-clay-deep">
+                <X class="size-4" />
+                Quitar filtros
+              </a>
+            )}
+          </div>
+
+          {page.items.length > 0 ? (
+            <>
+              <ProductGrid products={page.items} eagerCount={4} columns={3} />
+              <Pagination params={params} pageCount={pageCount} />
+            </>
+          ) : (
+            <div class="flex flex-col items-center gap-4 rounded-[var(--radius-card)] bg-sand/60 px-6 py-16 text-center">
+              <PackageSearch class="size-10 text-clay" stroke-width={1.5} />
+              {total > 0 ? (
+                <>
+                  <h2 class="text-2xl">Esta página no tiene productos</h2>
+                  <a href={catalogUrl({ ...params, pagina: 1 })} class="btn btn-primary">Ir a la primera página</a>
+                </>
+              ) : hasFilters ? (
+                <>
+                  <h2 class="text-2xl">No encontramos productos</h2>
+                  <p class="max-w-sm text-stone">Prueba con otra palabra o revisa otra categoría.</p>
+                  <a href="/catalogo" class="btn btn-primary">Ver todo el catálogo</a>
+                </>
+              ) : (
+                <>
+                  <h2 class="text-2xl">Pronto habrá productos aquí</h2>
+                  <p class="max-w-sm text-stone">Estamos preparando el catálogo. Mientras tanto, escríbenos por WhatsApp.</p>
+                </>
+              )}
+            </div>
+          )}
+        </>
+      )}
+    </section>
+  </div>
+</MainLayout>

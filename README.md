@@ -10,13 +10,13 @@ Comparte el proyecto de Supabase con la app administrativa ([brisa10-admin](http
 |------|-----------|--------|
 | 1 | Astro, React, TypeScript, Tailwind CSS v4 | ✅ |
 | 2 | Identidad visual, layout, navegación y página de inicio | ✅ |
-| 3 | Catálogo de productos (`/catalogo`) | ⏳ Siguiente |
-| 4 | Detalle de producto (`/productos/[slug]`) y filtros | ⏳ |
-| 5 | Carrito | ⏳ |
+| 3 | Catálogo (`/catalogo`): búsqueda, filtro por categoría, orden y paginación | ✅ |
+| 4 | Detalle de producto (`/productos/[slug]`): galería, cantidad, agregar al carrito, consulta por WhatsApp y relacionados | ✅ |
+| 5 | Carrito (`/carrito`) | ⏳ Siguiente |
 | 6 | Resumen del pedido y envío por WhatsApp | ⏳ |
 | 7 | SEO, rendimiento, despliegue en Cloudflare | ⏳ |
 
-Hasta que lleguen sus fases, los enlaces a `/catalogo`, `/productos/…` y `/carrito` muestran la página 404.
+Los productos ya se pueden agregar al carrito (se guarda en el navegador y el encabezado muestra el contador), pero la página `/carrito` llega en la fase 5 y por ahora muestra la página 404.
 
 ## Requisitos
 
@@ -56,7 +56,10 @@ Cliente ─► Cloudflare (Astro en el servidor + caché de ~1 min) ─► Supab
 - **Render en el servidor con caché corta** (`routeRules` en `astro.config.mjs`): el HTML llega completo, casi sin JavaScript, y un cambio hecho en la app administrativa se refleja en alrededor de un minuto sin reconstruir el sitio.
 - **React solo en islas interactivas** (carrito y pedido, fases 5 y 6). El resto son componentes Astro sin JavaScript; el menú móvil usa la API `popover` del navegador.
 - **Supabase por funciones RPC** (`get_public_catalog`, `get_public_product`, `get_public_categories`, `get_public_business`, `check_public_cart`). El rol `anon` no puede leer ninguna tabla; las funciones nunca devuelven stock exacto ni costos. Se llaman con `fetch`, sin el SDK.
-- Si una consulta falla, la sección correspondiente no se muestra y el resto de la página sigue funcionando.
+- Si una consulta falla, la sección correspondiente no se muestra y el resto de la página sigue funcionando. Las respuestas con error no se guardan en caché.
+- **Filtros en la URL** (`/catalogo?q=…&categoria=…&orden=…&pagina=…`): se resuelven en el servidor, funcionan sin JavaScript y se pueden compartir. Las búsquedas llevan `noindex`.
+- **Carrito en `localStorage`** (`src/lib/cart.ts`): es una intención de pedido, no reserva ni descuenta inventario.
+- **Producto no publicado o inexistente:** responde 404. Cada producto lleva Open Graph (foto, precio) y datos estructurados Schema.org.
 
 ```
 src/
@@ -64,11 +67,12 @@ src/
 ├─ components/
 │  ├─ layout/           Header, Footer, logotipo, botón flotante de WhatsApp
 │  ├─ home/             Secciones de la página de inicio
-│  ├─ products/         Tarjeta, grilla e indicador de disponibilidad
+│  ├─ products/         Tarjeta, grilla, filtros, paginación, galería y disponibilidad
+│  ├─ cart/             Islas React del carrito
 │  └─ common/           Piezas reutilizables
 ├─ config/site.ts       Nombre, redes, textos de envío, navegación
 ├─ layouts/             MainLayout (metadatos, header, footer)
-├─ lib/                 Formato de moneda, enlaces de WhatsApp
+├─ lib/                 Formato de moneda, WhatsApp, filtros del catálogo, carrito
 ├─ pages/               Rutas
 ├─ services/supabase/   Único lugar que consulta Supabase
 ├─ styles/global.css    Sistema de diseño (tokens de Tailwind)

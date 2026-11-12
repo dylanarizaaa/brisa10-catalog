@@ -16,6 +16,8 @@ async function orEmpty<T>(label: string, promise: Promise<T[]>): Promise<T[]> {
     return await promise
   } catch (error) {
     console.error(`[inicio] ${label}:`, error)
+    // Una página incompleta por un error no debe quedar guardada en la caché del CDN.
+    Astro.cache.set(false)
     return []
   }
 }

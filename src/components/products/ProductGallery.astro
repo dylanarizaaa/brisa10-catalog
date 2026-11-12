@@ -1,0 +1,93 @@
+---
+import { ImageOff } from '@lucide/astro'
+import { productImageUrl } from '@/services/supabase/client'
+
+interface Props {
+  images: string[]
+  productName: string
+  dimmed?: boolean
+}
+const { images, productName, dimmed = false } = Astro.props
+---
+
+{images.length === 0 ? (
+  <div class="grid aspect-[4/5] place-items-center rounded-[var(--radius-card)] bg-sand text-linen">
+    <ImageOff class="size-14" />
+    <span class="sr-only">Este producto todavía no tiene fotografías</span>
+  </div>
+) : (
+  <div class="flex flex-col gap-3" data-gallery>
+    <!-- Carrusel con scroll nativo: en el celular se desliza con el dedo, sin JavaScript. -->
+    <ul
+      class="gallery-track flex snap-x snap-mandatory overflow-x-auto rounded-[var(--radius-card)] bg-sand"
+      data-gallery-track
+      tabindex={images.length > 1 ? 0 : undefined}
+      aria-label={images.length > 1 ? `Fotografías de ${productName}` : undefined}
+    >
+      {images.map((path, index) => (
+        <li class="w-full shrink-0 snap-center" data-gallery-slide>
+          <img
+            src={productImageUrl(path)}
+            alt={images.length > 1 ? `${productName}, foto ${index + 1} de ${images.length}` : productName}
+            width="900"
+            height="1125"
+            loading={index === 0 ? 'eager' : 'lazy'}
+            fetchpriority={index === 0 ? 'high' : undefined}
+            decoding="async"
+            class:list={['aspect-[4/5] w-full object-cover', dimmed && 'opacity-70 grayscale-[30%]']}
+          />
+        </li>
+      ))}
+    </ul>
+    {images.length > 1 && (
+      <ul class="flex gap-2 overflow-x-auto pb-1">
+        {images.map((path, index) => (
+          <li class="shrink-0">
+            <button
+              type="button"
+              data-gallery-thumb={index}
+              aria-label={`Ver foto ${index + 1}`}
+              aria-current={index === 0 ? 'true' : undefined}
+              class="block size-16 overflow-hidden rounded-xl border-2 border-transparent opacity-70 transition aria-[current=true]:border-clay aria-[current=true]:opacity-100 hover:opacity-100 sm:size-20"
+            >
+              <img src={productImageUrl(path)} alt="" width="160" height="160" loading="lazy" decoding="async" class="size-full object-cover" />
+            </button>
+          </li>
+        ))}
+      </ul>
+    )}
+  </div>
+)}
+
+<style>
+  .gallery-track {
+    scrollbar-width: none;
+  }
+  .gallery-track::-webkit-scrollbar {
+    display: none;
+  }
+</style>
+
+<script>
+  // Las miniaturas desplazan el carrusel y se marcan según la foto visible.
+  for (const gallery of document.querySelectorAll<HTMLElement>('[data-gallery]')) {
+    const track = gallery.querySelector<HTMLElement>('[data-gallery-track]')
+    const thumbs = [...gallery.querySelectorAll<HTMLButtonElement>('[data-gallery-thumb]')]
+    if (!track || thumbs.length === 0) continue
+
+    const smooth = !window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    thumbs.forEach((thumb, index) => {
+      thumb.addEventListener('click', () => {
+        track.scrollTo({ left: index * track.clientWidth, behavior: smooth ? 'smooth' : 'auto' })
+      })
+    })
+    const sync = () => {
+      const current = Math.round(track.scrollLeft / track.clientWidth)
+      thumbs.forEach((thumb, index) => {
+        if (index === current) thumb.setAttribute('aria-current', 'true')
+        else thumb.removeAttribute('aria-current')
+      })
+    }
+    track.addEventListener('scroll', sync, { passive: true })
+  }
+</script>
