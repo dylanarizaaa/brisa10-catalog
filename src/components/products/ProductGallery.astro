@@ -8,39 +8,19 @@ interface Props {
   dimmed?: boolean
 }
 const { images, productName, dimmed = false } = Astro.props
+const many = images.length > 1
 ---
 
 {images.length === 0 ? (
-  <div class="grid aspect-[4/5] place-items-center rounded-[var(--radius-card)] bg-sand text-linen">
+  <div class="grid aspect-[4/5] place-items-center rounded-[1.75rem] bg-sand text-linen">
     <ImageOff class="size-14" />
     <span class="sr-only">Este producto todavía no tiene fotografías</span>
   </div>
 ) : (
-  <div class="flex flex-col gap-3" data-gallery>
-    <!-- Carrusel con scroll nativo: en el celular se desliza con el dedo, sin JavaScript. -->
-    <ul
-      class="gallery-track flex snap-x snap-mandatory overflow-x-auto rounded-[var(--radius-card)] bg-sand"
-      data-gallery-track
-      tabindex={images.length > 1 ? 0 : undefined}
-      aria-label={images.length > 1 ? `Fotografías de ${productName}` : undefined}
-    >
-      {images.map((path, index) => (
-        <li class="w-full shrink-0 snap-center" data-gallery-slide>
-          <img
-            src={productImageUrl(path)}
-            alt={images.length > 1 ? `${productName}, foto ${index + 1} de ${images.length}` : productName}
-            width="900"
-            height="1125"
-            loading={index === 0 ? 'eager' : 'lazy'}
-            fetchpriority={index === 0 ? 'high' : undefined}
-            decoding="async"
-            class:list={['aspect-[4/5] w-full object-cover', dimmed && 'opacity-70 grayscale-[30%]']}
-          />
-        </li>
-      ))}
-    </ul>
-    {images.length > 1 && (
-      <ul class="flex gap-2 overflow-x-auto pb-1">
+  <div class="flex flex-col-reverse gap-3 lg:flex-row lg:gap-4" data-gallery>
+    {/* En escritorio las miniaturas van a la izquierda; en el celular, debajo. */}
+    {many && (
+      <ul class="flex shrink-0 gap-2.5 overflow-x-auto pb-1 lg:w-20 lg:flex-col lg:overflow-visible lg:pb-0">
         {images.map((path, index) => (
           <li class="shrink-0">
             <button
@@ -48,7 +28,7 @@ const { images, productName, dimmed = false } = Astro.props
               data-gallery-thumb={index}
               aria-label={`Ver foto ${index + 1}`}
               aria-current={index === 0 ? 'true' : undefined}
-              class="block size-16 overflow-hidden rounded-xl border-2 border-transparent opacity-70 transition aria-[current=true]:border-clay aria-[current=true]:opacity-100 hover:opacity-100 sm:size-20"
+              class="block size-16 overflow-hidden rounded-xl opacity-60 ring-2 ring-transparent ring-offset-2 ring-offset-cream transition aria-[current=true]:opacity-100 aria-[current=true]:ring-clay hover:opacity-100 sm:size-20"
             >
               <img src={productImageUrl(path)} alt="" width="160" height="160" loading="lazy" decoding="async" class="size-full object-cover" />
             </button>
@@ -56,6 +36,35 @@ const { images, productName, dimmed = false } = Astro.props
         ))}
       </ul>
     )}
+    <div class="relative min-w-0 flex-1">
+      <!-- Carrusel con scroll nativo: en el celular se desliza con el dedo, sin JavaScript. -->
+      <ul
+        class="gallery-track flex snap-x snap-mandatory overflow-x-auto rounded-[1.75rem] bg-sand"
+        data-gallery-track
+        tabindex={many ? 0 : undefined}
+        aria-label={many ? `Fotografías de ${productName}` : undefined}
+      >
+        {images.map((path, index) => (
+          <li class="w-full shrink-0 snap-center" data-gallery-slide>
+            <img
+              src={productImageUrl(path)}
+              alt={many ? `${productName}, foto ${index + 1} de ${images.length}` : productName}
+              width="900"
+              height="1125"
+              loading={index === 0 ? 'eager' : 'lazy'}
+              fetchpriority={index === 0 ? 'high' : undefined}
+              decoding="async"
+              class:list={['aspect-[4/5] w-full object-cover', dimmed && 'opacity-70 grayscale-[30%]']}
+            />
+          </li>
+        ))}
+      </ul>
+      {many && (
+        <p class="pointer-events-none absolute right-4 bottom-4 rounded-full bg-ink/75 px-3 py-1 text-xs font-medium text-cream tabular-nums backdrop-blur-sm" aria-hidden="true">
+          <span data-gallery-count>1</span> / {images.length}
+        </p>
+      )}
+    </div>
   </div>
 )}
 
@@ -69,10 +78,11 @@ const { images, productName, dimmed = false } = Astro.props
 </style>
 
 <script>
-  // Las miniaturas desplazan el carrusel y se marcan según la foto visible.
+  // Las miniaturas desplazan el carrusel; la miniatura activa y el contador siguen a la foto visible.
   for (const gallery of document.querySelectorAll<HTMLElement>('[data-gallery]')) {
     const track = gallery.querySelector<HTMLElement>('[data-gallery-track]')
     const thumbs = [...gallery.querySelectorAll<HTMLButtonElement>('[data-gallery-thumb]')]
+    const count = gallery.querySelector<HTMLElement>('[data-gallery-count]')
     if (!track || thumbs.length === 0) continue
 
     const smooth = !window.matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -87,6 +97,7 @@ const { images, productName, dimmed = false } = Astro.props
         if (index === current) thumb.setAttribute('aria-current', 'true')
         else thumb.removeAttribute('aria-current')
       })
+      if (count) count.textContent = String(current + 1)
     }
     track.addEventListener('scroll', sync, { passive: true })
   }

@@ -20,8 +20,8 @@ export function OrderSummary({ items, delivery, showItems = false, children }: P
   const pickup = delivery === 'recoger'
 
   return (
-    <section aria-labelledby="summary-title" className="flex flex-col gap-5 rounded-[var(--radius-card)] bg-sand/70 p-6">
-      <h2 id="summary-title" className="text-2xl">
+    <section aria-labelledby="summary-title" className="flex flex-col gap-5 rounded-[1.75rem] border border-linen bg-card p-6 shadow-soft sm:p-7">
+      <h2 id="summary-title" className="text-[1.75rem]">
         Resumen
       </h2>
 
@@ -53,7 +53,7 @@ export function OrderSummary({ items, delivery, showItems = false, children }: P
         <div className="flex items-baseline justify-between gap-4 border-t border-linen pt-4">
           <dt className="font-medium">Total estimado</dt>
           <dd className="text-right">
-            <span className="font-display text-2xl tabular-nums">{formatCurrency(subtotal)}</span>
+            <span className="font-display text-3xl tabular-nums">{formatCurrency(subtotal)}</span>
             {!pickup && <span className="block text-xs text-stone">+ envío</span>}
           </dd>
         </div>
@@ -61,7 +61,7 @@ export function OrderSummary({ items, delivery, showItems = false, children }: P
 
       {children}
 
-      <p className="text-xs leading-relaxed text-stone">
+      <p className="rounded-2xl bg-sand/70 px-4 py-3 text-xs leading-relaxed text-stone">
         Esto es una solicitud de pedido, no una compra pagada. Te confirmamos disponibilidad, entrega y forma de pago por
         WhatsApp.
       </p>

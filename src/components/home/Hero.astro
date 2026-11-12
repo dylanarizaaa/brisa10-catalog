@@ -1,37 +1,128 @@
 ---
-import { ArrowRight } from '@lucide/astro'
-// PROVISIONAL: reemplazar por una fotografía real (p. ej. '@/assets/hero.jpg').
+import { ArrowRight, ArrowUpRight, Check } from '@lucide/astro'
+// Ilustración de respaldo: se usa mientras no haya productos con foto.
 import heroImage from '@/assets/hero.svg'
+import Sparkle from '@/components/common/Sparkle.astro'
+import { buttonVariants } from '@/components/ui/button'
+import { formatCurrency } from '@/lib/formatCurrency'
+import { productImageUrl } from '@/services/supabase/client'
+import type { ProductCard } from '@/types/product'
+
+interface Props {
+  /** Productos para el collage (destacados o recientes). Se usan los dos primeros con foto. */
+  products: ProductCard[]
+}
+const [main, second] = Astro.props.products.filter((product) => product.main_image_path)
+const badgeText = 'decoración ✦ regalos ✦ detalles ✦ '
 ---
 
-<section class="container-page grid items-center gap-10 pt-8 pb-16 md:grid-cols-[1.05fr_1fr] md:gap-16 md:pt-14 md:pb-24">
-  <div class="flex flex-col items-start gap-6">
-    <p class="eyebrow">Decoración y regalos · Bogotá</p>
-    <h1 class="text-[2.6rem] leading-[1.05] sm:text-6xl lg:text-7xl">
-      Pequeños detalles que hacen <em class="font-normal text-clay">especial</em> cada espacio
-    </h1>
-    <p class="max-w-md text-lg leading-relaxed text-stone">
-      Descubre nuestra colección de decoración, regalos y artículos especiales.
-    </p>
-    <div class="mt-2 flex flex-wrap gap-3">
-      <a href="/catalogo" class="btn btn-primary group">
-        Explorar catálogo
-        <ArrowRight class="size-4 transition-transform duration-200 group-hover:translate-x-0.5" />
-      </a>
-      <a href="#envios" class="btn btn-outline">Envíos en Bogotá</a>
-    </div>
-  </div>
+<section class="grain relative overflow-hidden">
+  <div class="pointer-events-none absolute -top-40 -right-32 size-[36rem] rounded-full bg-clay-soft/70 blur-3xl" aria-hidden="true"></div>
+  <div class="pointer-events-none absolute -bottom-48 -left-40 size-[30rem] rounded-full bg-sage-soft/80 blur-3xl" aria-hidden="true"></div>
 
-  <div class="relative mx-auto w-full max-w-md md:max-w-none">
-    <div class="absolute -top-4 -right-4 hidden h-full w-full rounded-t-full rounded-b-[var(--radius-card)] border border-clay/40 md:block" aria-hidden="true"></div>
-    <img
-      src={heroImage.src}
-      alt="Jarrones de cerámica y un ramo decorativo sobre una repisa"
-      width="800"
-      height="1000"
-      fetchpriority="high"
-      decoding="async"
-      class="relative aspect-[4/5] w-full rounded-t-full rounded-b-[var(--radius-card)] bg-sand object-cover"
-    />
+  <div class="container-page relative grid items-center gap-14 pt-10 pb-20 lg:grid-cols-[1.05fr_1fr] lg:gap-8 lg:pt-16 lg:pb-28">
+    <div class="flex flex-col items-start gap-7">
+      <p class="eyebrow animate-rise">Decoración y regalos · Bogotá</p>
+      <h1 class="animate-rise text-[2.75rem] leading-[1.02] [animation-delay:60ms] sm:text-6xl lg:text-[4.75rem]">
+        Pequeños detalles que hacen{' '}
+        <span class="relative inline-block whitespace-nowrap">
+          <em class="font-normal text-clay">especial</em>
+          <svg class="absolute -bottom-1 left-0 h-3 w-full text-clay/50" viewBox="0 0 200 12" fill="none" preserveAspectRatio="none" aria-hidden="true">
+            <path d="M2 8.500C40 2.500 78 2 112 5.500c30 3 58 3.500 86-1" stroke="currentColor" stroke-width="3" stroke-linecap="round" />
+          </svg>
+        </span>{' '}
+        cada espacio
+      </h1>
+      <p class="max-w-md animate-rise text-lg leading-relaxed text-stone [animation-delay:120ms]">
+        Descubre nuestra colección de decoración, regalos y artículos especiales.
+      </p>
+      <div class="flex animate-rise flex-wrap gap-3 [animation-delay:180ms]">
+        <a href="/catalogo" class:list={[buttonVariants({ size: 'lg' }), 'group']}>
+          Explorar catálogo
+          <ArrowRight class="size-4 transition-transform duration-200 group-hover:translate-x-1" />
+        </a>
+        <a href="#envios" class={buttonVariants({ variant: 'outline', size: 'lg' })}>Envíos en Bogotá</a>
+      </div>
+      <ul class="flex flex-wrap gap-x-6 gap-y-2 pt-2 text-sm text-stone">
+        {['Pedido por WhatsApp', 'Envíos en Bogotá', 'Recoge en tienda'].map((item) => (
+          <li class="flex items-center gap-2">
+            <span class="grid size-5 place-items-center rounded-full bg-sage-soft text-sage"><Check class="size-3" stroke-width={3} /></span>
+            {item}
+          </li>
+        ))}
+      </ul>
+    </div>
+
+    <!-- Collage: arco principal, tarjeta secundaria, etiqueta del producto y sello giratorio. -->
+    <div class="relative mx-auto w-full max-w-[26rem] pb-6 pl-6 sm:max-w-[30rem] lg:max-w-none lg:pl-10">
+      <div class="relative ml-auto w-[82%]">
+        <div class="arch absolute -top-4 -right-4 size-full border border-clay/40" aria-hidden="true"></div>
+        {main ? (
+          <a href={`/productos/${main.slug}`} class="arch group relative block overflow-hidden bg-sand shadow-lift" aria-label={`Ver ${main.name}`}>
+            <img
+              src={productImageUrl(main.main_image_path!)}
+              alt={main.name}
+              width="800"
+              height="1000"
+              fetchpriority="high"
+              decoding="async"
+              class="aspect-[4/5] w-full object-cover transition-transform duration-700 ease-[var(--ease-soft)] group-hover:scale-[1.04]"
+            />
+          </a>
+        ) : (
+          <img
+            src={heroImage.src}
+            alt="Jarrones de cerámica y un ramo decorativo sobre una repisa"
+            width="800"
+            height="1000"
+            fetchpriority="high"
+            decoding="async"
+            class="arch relative aspect-[4/5] w-full bg-sand object-cover shadow-lift"
+          />
+        )}
+      </div>
+
+      {second && (
+        <a
+          href={`/productos/${second.slug}`}
+          aria-label={`Ver ${second.name}`}
+          class="group absolute bottom-0 left-0 w-[40%] -rotate-6 overflow-hidden rounded-2xl border-[5px] border-cream bg-sand shadow-lift transition-transform duration-500 ease-[var(--ease-soft)] hover:-rotate-3"
+        >
+          <img
+            src={productImageUrl(second.main_image_path!)}
+            alt={second.name}
+            width="400"
+            height="500"
+            decoding="async"
+            class="aspect-[4/5] w-full object-cover"
+          />
+        </a>
+      )}
+
+      {main && (
+        <a
+          href={`/productos/${main.slug}`}
+          class="group absolute right-0 bottom-10 flex max-w-[62%] items-center gap-3 rounded-2xl bg-card/95 py-2.5 pr-3 pl-4 shadow-lift backdrop-blur transition-transform duration-300 hover:-translate-y-1 sm:-right-3"
+        >
+          <span class="min-w-0">
+            <span class="block truncate text-sm font-medium">{main.name}</span>
+            <span class="block font-display text-base text-clay">{formatCurrency(main.price)}</span>
+          </span>
+          <span class="grid size-9 shrink-0 place-items-center rounded-full bg-ink text-cream transition-colors group-hover:bg-clay">
+            <ArrowUpRight class="size-4" />
+          </span>
+        </a>
+      )}
+
+      <div class="absolute top-0 left-0 grid size-24 place-items-center rounded-full bg-clay text-cream shadow-lift sm:size-28 lg:left-2" aria-hidden="true">
+        <svg viewBox="0 0 100 100" class="absolute inset-0 size-full animate-spin-slow">
+          <defs><path id="hero-badge-path" d="M50 50m-37 0a37 37 0 1 1 74 0a37 37 0 1 1-74 0" /></defs>
+          <text class="fill-current text-[10.5px] font-medium tracking-[0.16em] uppercase">
+            <textPath href="#hero-badge-path">{badgeText}</textPath>
+          </text>
+        </svg>
+        <Sparkle class="size-6 sm:size-7" />
+      </div>
+    </div>
   </div>
 </section>

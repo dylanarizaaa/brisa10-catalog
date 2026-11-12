@@ -11,15 +11,18 @@ interface Props {
 const { eyebrow, title, href, linkLabel = 'Ver todo' } = Astro.props
 ---
 
-<div class="mb-8 flex items-end justify-between gap-6 sm:mb-10">
-  <div class="flex flex-col gap-2">
+<div class="mb-9 flex items-end justify-between gap-6 sm:mb-12" data-reveal>
+  <div class="flex flex-col gap-3">
     {eyebrow && <p class="eyebrow">{eyebrow}</p>}
-    <h2 class="text-3xl sm:text-4xl">{title}</h2>
+    <h2 class="text-[2rem] leading-tight sm:text-5xl">{title}</h2>
   </div>
   {href && (
-    <a href={href} class="group inline-flex min-h-11 shrink-0 items-center gap-1.5 text-sm font-medium text-clay hover:text-clay-deep">
-      {linkLabel}
-      <ArrowRight class="size-4 transition-transform duration-200 group-hover:translate-x-0.5" />
+    <a href={href} class="group inline-flex min-h-11 shrink-0 items-center gap-2 text-sm font-medium text-ink">
+      <span class="link-draw hidden sm:inline">{linkLabel}</span>
+      <span class="grid size-10 place-items-center rounded-full border border-ink/25 transition-colors duration-200 group-hover:border-clay group-hover:bg-clay group-hover:text-white">
+        <ArrowRight class="size-4" />
+      </span>
+      <span class="sr-only sm:hidden">{linkLabel}</span>
     </a>
   )}
 </div>

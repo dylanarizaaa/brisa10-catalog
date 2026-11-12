@@ -1,5 +1,6 @@
 ---
 import { OrderForm } from '@/components/checkout/OrderForm'
+import PageHeader from '@/components/common/PageHeader.astro'
 import MainLayout from '@/layouts/MainLayout.astro'
 import { getBusiness } from '@/services/supabase/business'
 
@@ -7,17 +8,12 @@ const business = await getBusiness()
 ---
 
 <MainLayout title="Tu pedido" description="Completa tus datos y envía tu solicitud de pedido por WhatsApp." noindex hideWhatsAppFab>
-  <div class="container-page pt-8 pb-4 sm:pt-12">
-    <nav aria-label="Ruta de navegación" class="mb-4 text-sm text-stone">
-      <ol class="flex flex-wrap items-center gap-2">
-        <li><a href="/" class="hover:text-ink hover:underline">Inicio</a></li>
-        <li aria-hidden="true">/</li>
-        <li><a href="/carrito" class="hover:text-ink hover:underline">Carrito</a></li><li aria-hidden="true">/</li><li aria-current="page" class="text-ink">Pedido</li>
-      </ol>
-    </nav>
-    <h1 class="text-4xl sm:text-5xl">Tu pedido</h1>
-  </div>
-  <div class="container-page py-6 lg:py-10">
+  <PageHeader
+    title="Tu pedido"
+    description="Cuéntanos a nombre de quién va y cómo quieres recibirlo."
+    crumbs={[{ label: 'Inicio', href: '/' }, { label: 'Carrito', href: '/carrito' }, { label: 'Pedido' }]}
+  />
+  <div class="container-page py-8 lg:py-12">
     <!-- El carrito vive en el navegador (localStorage): esta parte se pinta en el cliente. -->
     <OrderForm client:only="react" businessName={business.business_name}>
       <p slot="fallback" class="py-16 text-center text-stone">Cargando…</p>

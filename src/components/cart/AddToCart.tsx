@@ -1,4 +1,6 @@
+import { Check, ShoppingBag } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
+import { Button } from '@/components/ui/button'
 import { addToCart, type CartItem } from '@/lib/cart'
 import { QuantityStepper } from './QuantityStepper'
 
@@ -18,9 +20,9 @@ export function AddToCart({ product, soldOut }: Props) {
 
   if (soldOut) {
     return (
-      <button type="button" disabled className="btn w-full cursor-not-allowed bg-linen text-stone">
+      <Button type="button" variant="secondary" size="lg" disabled className="w-full">
         Agotado por ahora
-      </button>
+      </Button>
     )
   }
 
@@ -41,22 +43,28 @@ export function AddToCart({ product, soldOut }: Props) {
     <div className="flex flex-col gap-3">
       <div className="flex flex-wrap gap-3">
         <QuantityStepper value={quantity} onChange={setQuantity} />
-        <button type="button" className="btn btn-primary min-h-12 flex-1" onClick={handleAdd}>
+        <Button type="button" size="lg" className="flex-1" onClick={handleAdd}>
+          <ShoppingBag />
           Agregar al carrito
-        </button>
+        </Button>
       </div>
 
-      <p role="status" className="min-h-6 text-sm">
+      <div role="status" className="empty:hidden">
         {added !== null && (
-          <span className="text-sage">
-            ✓ Agregado. Llevas {added} {added === 1 ? 'unidad' : 'unidades'} de este producto.{' '}
-            <a href="/carrito" className="font-medium text-clay underline underline-offset-4">
-              Ver carrito
-            </a>
-          </span>
+          <p className="flex animate-in items-center gap-3 rounded-2xl bg-sage-soft px-4 py-3 text-sm text-ink/85 duration-300 fade-in slide-in-from-bottom-1">
+            <span className="grid size-6 shrink-0 place-items-center rounded-full bg-sage text-cream">
+              <Check className="size-3.5" strokeWidth={3} />
+            </span>
+            <span>
+              Agregado. Llevas {added} {added === 1 ? 'unidad' : 'unidades'} de este producto.{' '}
+              <a href="/carrito" className="font-medium text-clay-deep underline underline-offset-4">
+                Ver carrito
+              </a>
+            </span>
+          </p>
         )}
-        {full && <span className="text-clay-deep">Tu carrito ya tiene el máximo de productos distintos.</span>}
-      </p>
+        {full && <p className="rounded-2xl bg-clay-soft px-4 py-3 text-sm text-clay-deep">Tu carrito ya tiene el máximo de productos distintos.</p>}
+      </div>
     </div>
   )
 }

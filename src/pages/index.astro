@@ -3,8 +3,10 @@ import About from '@/components/home/About.astro'
 import Benefits from '@/components/home/Benefits.astro'
 import CategoryGrid from '@/components/home/CategoryGrid.astro'
 import Hero from '@/components/home/Hero.astro'
+import Marquee from '@/components/home/Marquee.astro'
 import ProductSection from '@/components/home/ProductSection.astro'
 import ShippingInfo from '@/components/home/ShippingInfo.astro'
+import SocialBand from '@/components/home/SocialBand.astro'
 import { site } from '@/config/site'
 import MainLayout from '@/layouts/MainLayout.astro'
 import { getBusiness } from '@/services/supabase/business'
@@ -53,7 +55,8 @@ const jsonLd = {
 
 <MainLayout>
   <script slot="head" type="application/ld+json" set:html={JSON.stringify(jsonLd).replace(/</g, '\\u003c')} />
-  <Hero />
+  <Hero products={featured.length > 0 ? featured : recent} />
+  <Marquee words={categories.map((category) => category.name)} />
   {categories.length > 0 && <CategoryGrid categories={categories} />}
   {featured.length > 0 && (
     <ProductSection eyebrow="Favoritos" title="Productos destacados" products={featured} href="/catalogo" tinted />
@@ -64,4 +67,5 @@ const jsonLd = {
   )}
   <Benefits />
   <ShippingInfo businessName={business.business_name} />
+  <SocialBand businessName={business.business_name} />
 </MainLayout>

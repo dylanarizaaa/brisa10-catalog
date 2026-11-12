@@ -1,8 +1,12 @@
 ---
 import { PackageSearch, TriangleAlert, X } from '@lucide/astro'
-import CatalogFilters from '@/components/products/CatalogFilters.astro'
+import EmptyState from '@/components/common/EmptyState.astro'
+import PageHeader from '@/components/common/PageHeader.astro'
+import { CatalogToolbar } from '@/components/products/CatalogToolbar'
+import CategoryChips from '@/components/products/CategoryChips.astro'
 import Pagination from '@/components/products/Pagination.astro'
 import ProductGrid from '@/components/products/ProductGrid.astro'
+import { buttonVariants } from '@/components/ui/button'
 import MainLayout from '@/layouts/MainLayout.astro'
 import { CATALOG_PAGE_SIZE, catalogUrl, parseCatalogParams } from '@/lib/catalogUrl'
 import { getCategories } from '@/services/supabase/categories'
@@ -44,6 +48,9 @@ const title = params.q ? `Resultados para "${params.q}"` : category ? `${categor
 const description = category
   ? `${category.name}: ${category.product_count} ${category.product_count === 1 ? 'producto' : 'productos'} disponibles en nuestra tienda de Bogotá. Haz tu pedido por WhatsApp.`
   : 'Explora todos nuestros productos de decoración, cerámicas, peluches y regalos. Haz tu pedido por WhatsApp.'
+const intro = category
+  ? `Todo lo que tenemos en ${category.name.toLowerCase()}, listo para pedir por WhatsApp.`
+  : 'Decoración, cerámicas, peluches y regalos. Elige lo que te guste y pídelo por WhatsApp.'
 ---
 
 <MainLayout
@@ -52,87 +59,66 @@ const description = category
   canonicalPath={catalogUrl({ categoria: category?.slug, pagina: params.pagina })}
   noindex={Boolean(params.q) || !page}
 >
-  <div class="container-page pt-8 pb-4 sm:pt-12">
-    <nav aria-label="Ruta de navegación" class="mb-4 text-sm text-stone">
-      <ol class="flex flex-wrap items-center gap-2">
-        <li><a href="/" class="hover:text-ink hover:underline">Inicio</a></li>
-        <li aria-hidden="true">/</li>
-        {category ? (
-          <>
-            <li><a href="/catalogo" class="hover:text-ink hover:underline">Catálogo</a></li>
-            <li aria-hidden="true">/</li>
-            <li aria-current="page" class="text-ink">{category.name}</li>
-          </>
-        ) : (
-          <li aria-current="page" class="text-ink">Catálogo</li>
-        )}
-      </ol>
-    </nav>
-    <h1 class="text-4xl sm:text-5xl">{heading}</h1>
+  <PageHeader
+    title={heading}
+    description={intro}
+    crumbs={category
+      ? [{ label: 'Inicio', href: '/' }, { label: 'Catálogo', href: '/catalogo' }, { label: category.name }]
+      : [{ label: 'Inicio', href: '/' }, { label: 'Catálogo' }]}
+  />
+
+  <div class="container-page flex flex-col gap-6 pt-8 pb-4 sm:pt-10">
+    <CatalogToolbar client:load params={params} />
+    <CategoryChips params={params} categories={categories} />
   </div>
 
-  <div class="container-page grid grid-cols-[minmax(0,1fr)] gap-8 py-6 lg:grid-cols-[15rem_minmax(0,1fr)] lg:gap-12 lg:py-10">
-    <aside class="min-w-0 lg:sticky lg:top-24 lg:self-start">
-      <CatalogFilters params={params} categories={categories} />
-    </aside>
-
-    <section aria-labelledby="catalog-results" class="min-w-0">
-      <h2 id="catalog-results" class="sr-only">Productos</h2>
-      {!page ? (
-        <div class="flex flex-col items-center gap-4 rounded-[var(--radius-card)] bg-sand/60 px-6 py-16 text-center">
-          <TriangleAlert class="size-10 text-clay" stroke-width={1.5} />
-          <h2 class="text-2xl">No pudimos cargar el catálogo</h2>
-          <p class="max-w-sm text-stone">Puede ser un problema temporal de conexión. Inténtalo de nuevo en un momento.</p>
-          <a href={Astro.url.pathname + Astro.url.search} class="btn btn-primary">Reintentar</a>
-        </div>
-      ) : (
-        <>
-          <div class="mb-6 flex flex-wrap items-center gap-x-4 gap-y-2">
-            <p class="text-sm text-stone" aria-live="polite">
-              {total === 0 ? 'Sin resultados' : `${total} ${total === 1 ? 'producto' : 'productos'}`}
-              {params.q && (
-                <>
-                  {' '}para <span class="font-medium text-ink">"{params.q}"</span>
-                </>
-              )}
-            </p>
-            {hasFilters && (
-              <a href={catalogUrl({ orden: params.orden })} class="inline-flex min-h-9 items-center gap-1 text-sm font-medium text-clay hover:text-clay-deep">
-                <X class="size-4" />
-                Quitar filtros
-              </a>
+  <section aria-labelledby="catalog-results" class="container-page py-6 sm:py-8">
+    <h2 id="catalog-results" class="sr-only">Productos</h2>
+    {!page ? (
+      <EmptyState title="No pudimos cargar el catálogo" text="Puede ser un problema temporal de conexión. Inténtalo de nuevo en un momento.">
+        <TriangleAlert slot="icon" class="size-8" stroke-width={1.5} />
+        <a href={Astro.url.pathname + Astro.url.search} class={buttonVariants()}>Reintentar</a>
+      </EmptyState>
+    ) : (
+      <>
+        <div class="mb-7 flex flex-wrap items-center gap-x-4 gap-y-2">
+          <p class="text-sm text-stone" aria-live="polite">
+            {total === 0 ? 'Sin resultados' : `${total} ${total === 1 ? 'producto' : 'productos'}`}
+            {params.q && (
+              <>
+                {' '}para <span class="font-medium text-ink">"{params.q}"</span>
+              </>
             )}
-          </div>
-
-          {page.items.length > 0 ? (
-            <>
-              <ProductGrid products={page.items} eagerCount={4} columns={3} />
-              <Pagination params={params} pageCount={pageCount} />
-            </>
-          ) : (
-            <div class="flex flex-col items-center gap-4 rounded-[var(--radius-card)] bg-sand/60 px-6 py-16 text-center">
-              <PackageSearch class="size-10 text-clay" stroke-width={1.5} />
-              {total > 0 ? (
-                <>
-                  <h2 class="text-2xl">Esta página no tiene productos</h2>
-                  <a href={catalogUrl({ ...params, pagina: 1 })} class="btn btn-primary">Ir a la primera página</a>
-                </>
-              ) : hasFilters ? (
-                <>
-                  <h2 class="text-2xl">No encontramos productos</h2>
-                  <p class="max-w-sm text-stone">Prueba con otra palabra o revisa otra categoría.</p>
-                  <a href="/catalogo" class="btn btn-primary">Ver todo el catálogo</a>
-                </>
-              ) : (
-                <>
-                  <h2 class="text-2xl">Pronto habrá productos aquí</h2>
-                  <p class="max-w-sm text-stone">Estamos preparando el catálogo. Mientras tanto, escríbenos por WhatsApp.</p>
-                </>
-              )}
-            </div>
+          </p>
+          {hasFilters && (
+            <a href={catalogUrl({ orden: params.orden })} class="inline-flex min-h-9 items-center gap-1 text-sm font-medium text-clay hover:text-clay-deep">
+              <X class="size-4" />
+              Quitar filtros
+            </a>
           )}
-        </>
-      )}
-    </section>
-  </div>
+        </div>
+
+        {page.items.length > 0 ? (
+          <>
+            <ProductGrid products={page.items} eagerCount={4} />
+            <Pagination params={params} pageCount={pageCount} />
+          </>
+        ) : total > 0 ? (
+          <EmptyState title="Esta página no tiene productos">
+            <PackageSearch slot="icon" class="size-8" stroke-width={1.5} />
+            <a href={catalogUrl({ ...params, pagina: 1 })} class={buttonVariants()}>Ir a la primera página</a>
+          </EmptyState>
+        ) : hasFilters ? (
+          <EmptyState title="No encontramos productos" text="Prueba con otra palabra o revisa otra categoría.">
+            <PackageSearch slot="icon" class="size-8" stroke-width={1.5} />
+            <a href="/catalogo" class={buttonVariants()}>Ver todo el catálogo</a>
+          </EmptyState>
+        ) : (
+          <EmptyState title="Pronto habrá productos aquí" text="Estamos preparando el catálogo. Mientras tanto, escríbenos por WhatsApp.">
+            <PackageSearch slot="icon" class="size-8" stroke-width={1.5} />
+          </EmptyState>
+        )}
+      </>
+    )}
+  </section>
 </MainLayout>

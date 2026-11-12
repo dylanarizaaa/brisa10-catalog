@@ -1,0 +1,18 @@
+---
+import Sparkle from '@/components/common/Sparkle.astro'
+import { site } from '@/config/site'
+---
+
+<aside aria-label="Avisos de la tienda">
+<p class="bg-ink px-4 py-2 text-center text-[0.8125rem] tracking-wide text-cream/90">
+  <span class="inline-flex items-center gap-3">
+    <Sparkle class="size-2.5 text-clay-soft" />
+    <span>{site.shipping.summary}</span>
+    <Sparkle class="hidden size-2.5 text-clay-soft sm:block" />
+    <span class="hidden sm:inline">Haz tu pedido por WhatsApp</span>
+    <Sparkle class="hidden size-2.5 text-clay-soft md:block" />
+    <span class="hidden md:inline">Recoge en tienda sin costo</span>
+    <Sparkle class="size-2.5 text-clay-soft" />
+  </span>
+</p>
+</aside>

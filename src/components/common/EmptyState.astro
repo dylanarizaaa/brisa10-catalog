@@ -1,0 +1,17 @@
+---
+// Mensaje centrado para estados vacíos o de error, con un icono dentro del arco de la marca.
+interface Props {
+  title: string
+  text?: string
+}
+const { title, text } = Astro.props
+---
+
+<div class="grain flex flex-col items-center gap-5 rounded-[2rem] bg-sand/60 px-6 py-16 text-center sm:py-20">
+  <span class="arch grid h-24 w-20 place-items-center bg-clay-soft text-clay">
+    <slot name="icon" />
+  </span>
+  <h2 class="text-3xl">{title}</h2>
+  {text && <p class="max-w-sm leading-relaxed text-stone">{text}</p>}
+  <div class="flex flex-wrap justify-center gap-3 empty:hidden"><slot /></div>
+</div>

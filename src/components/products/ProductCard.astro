@@ -1,5 +1,5 @@
 ---
-import { ImageOff } from '@lucide/astro'
+import { Check, ImageOff, Plus } from '@lucide/astro'
 import { formatCurrency } from '@/lib/formatCurrency'
 import { productImageUrl } from '@/services/supabase/client'
 import type { ProductCard } from '@/types/product'
@@ -12,10 +12,18 @@ interface Props {
 }
 const { product, eager = false } = Astro.props
 const soldOut = product.availability === 'agotado'
+// Datos mínimos para agregar al carrito desde la tarjeta (script en MainLayout).
+const quickAdd = JSON.stringify({
+  id: product.id,
+  slug: product.slug,
+  name: product.name,
+  price: product.price,
+  image: product.main_image_path,
+})
 ---
 
-<article class="group relative flex flex-col gap-3">
-  <div class="relative aspect-[4/5] overflow-hidden rounded-[var(--radius-card)] bg-sand">
+<article class="product-card group relative flex flex-col gap-3.5">
+  <div class="relative aspect-[4/5] overflow-hidden rounded-[var(--radius-card)] bg-sand transition-shadow duration-300 group-hover:shadow-lift">
     {product.main_image_path ? (
       <img
         src={productImageUrl(product.main_image_path)}
@@ -25,7 +33,7 @@ const soldOut = product.availability === 'agotado'
         loading={eager ? 'eager' : 'lazy'}
         decoding="async"
         class:list={[
-          'size-full object-cover transition-transform duration-500 ease-[var(--ease-soft)] group-hover:scale-[1.04]',
+          'size-full object-cover transition-transform duration-700 ease-[var(--ease-soft)] group-hover:scale-[1.06]',
           soldOut && 'opacity-60 grayscale-[35%]',
         ]}
       />
@@ -36,18 +44,52 @@ const soldOut = product.availability === 'agotado'
     )}
     {product.availability !== 'disponible' && (
       <div class="absolute top-3 left-3">
-        <AvailabilityBadge availability={product.availability} />
+        <AvailabilityBadge availability={product.availability} onImage />
       </div>
+    )}
+    {!soldOut && (
+      <button
+        type="button"
+        data-quick-add={quickAdd}
+        aria-label={`Agregar ${product.name} al carrito`}
+        class="quick-add absolute right-3 bottom-3 z-10 grid size-11 place-items-center rounded-full bg-cream text-ink shadow-soft transition-all duration-200 hover:bg-clay hover:text-white data-added:bg-sage data-added:text-white"
+      >
+        <Plus class="icon-add size-5" />
+        <Check class="icon-done size-5" stroke-width={2.5} />
+      </button>
     )}
   </div>
   <div class="flex flex-col gap-1 px-1">
-    <p class="text-xs tracking-wide text-stone uppercase">{product.category_name}</p>
+    <p class="text-[0.6875rem] font-medium tracking-[0.14em] text-stone uppercase">{product.category_name}</p>
     <h3 class="font-sans text-[0.9375rem] leading-snug font-medium tracking-normal">
       <!-- El enlace cubre toda la tarjeta (::after), así el área táctil es la tarjeta completa. -->
       <a href={`/productos/${product.slug}`} class="after:absolute after:inset-0 after:rounded-[var(--radius-card)]">
         {product.name}
       </a>
     </h3>
-    <p class:list={['text-[0.9375rem]', soldOut ? 'text-stone' : 'text-ink']}>{formatCurrency(product.price)}</p>
+    <p class:list={['font-display text-lg', soldOut ? 'text-stone' : 'text-ink']}>{formatCurrency(product.price)}</p>
   </div>
 </article>
+
+<style is:global>
+  .icon-done,
+  .quick-add[data-added] .icon-add {
+    display: none;
+  }
+  .quick-add[data-added] .icon-done {
+    display: block;
+  }
+  /* Con ratón, el botón aparece al pasar por la tarjeta; en pantallas táctiles siempre está visible. */
+  @media (hover: hover) {
+    .quick-add {
+      opacity: 0;
+      transform: translateY(6px);
+    }
+    .product-card:hover .quick-add,
+    .quick-add:focus-visible,
+    .quick-add[data-added] {
+      opacity: 1;
+      transform: none;
+    }
+  }
+</style>

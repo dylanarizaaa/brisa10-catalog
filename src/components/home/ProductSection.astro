@@ -13,9 +13,9 @@ interface Props {
 const { eyebrow, title, products, href = '/catalogo', tinted = false } = Astro.props
 ---
 
-<section class:list={['py-12 sm:py-16', tinted && 'bg-sand/60']}>
+<section class:list={['py-16 sm:py-24', tinted && 'grain bg-sand/70']}>
   <div class="container-page">
     <SectionHeading eyebrow={eyebrow} title={title} href={href} />
-    <ProductGrid products={products} />
+    <ProductGrid products={products} reveal />
   </div>
 </section>

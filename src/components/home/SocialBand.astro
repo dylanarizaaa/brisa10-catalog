@@ -1,0 +1,46 @@
+---
+import SocialIcon from '@/components/common/SocialIcon.astro'
+import Sparkle from '@/components/common/Sparkle.astro'
+import { site } from '@/config/site'
+
+interface Props {
+  businessName: string
+}
+const { businessName } = Astro.props
+const socials = (
+  [
+    { name: 'instagram', label: 'Instagram', href: site.social.instagram },
+    { name: 'tiktok', label: 'TikTok', href: site.social.tiktok },
+    { name: 'facebook', label: 'Facebook', href: site.social.facebook },
+  ] as const
+).filter((social) => social.href)
+---
+
+{socials.length > 0 && (
+  <section class="container-page" aria-labelledby="redes-titulo">
+    <div class="grain relative flex flex-col items-center gap-7 overflow-hidden rounded-[2rem] bg-clay px-6 py-14 text-center text-cream sm:py-20" data-reveal>
+      <Sparkle class="absolute top-8 left-[8%] size-6 text-clay-soft/70" />
+      <Sparkle class="absolute right-[10%] bottom-10 size-9 text-clay-soft/50" />
+      <p class="eyebrow eyebrow-plain !text-clay-soft">Síguenos</p>
+      <h2 id="redes-titulo" class="max-w-2xl text-4xl leading-[1.08] sm:text-5xl">
+        Lo nuevo llega <em class="font-normal">primero</em> a nuestras redes
+      </h2>
+      <ul class="flex flex-wrap justify-center gap-3">
+        {socials.map((social) => (
+          <li>
+            <a
+              href={social.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={`${social.label} de ${businessName}`}
+              class="inline-flex h-12 items-center gap-2.5 rounded-full bg-cream px-6 font-medium text-ink transition-all duration-200 hover:-translate-y-0.5 hover:bg-white hover:shadow-lift"
+            >
+              <SocialIcon name={social.name} class="size-5" />
+              {social.label}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+)}

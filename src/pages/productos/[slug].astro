@@ -1,11 +1,13 @@
 ---
-import { Store, Truck } from '@lucide/astro'
 import { AddToCart } from '@/components/cart/AddToCart'
 import SectionHeading from '@/components/common/SectionHeading.astro'
 import SocialIcon from '@/components/common/SocialIcon.astro'
 import AvailabilityBadge from '@/components/products/AvailabilityBadge.astro'
 import ProductGallery from '@/components/products/ProductGallery.astro'
 import ProductGrid from '@/components/products/ProductGrid.astro'
+import { ProductInfoAccordion } from '@/components/products/ProductInfoAccordion'
+import { buttonVariants } from '@/components/ui/button'
+import Sparkle from '@/components/common/Sparkle.astro'
 import { site } from '@/config/site'
 import MainLayout from '@/layouts/MainLayout.astro'
 import { catalogUrl } from '@/lib/catalogUrl'
@@ -88,38 +90,38 @@ const breadcrumbLd = {
   </Fragment>
 
   <div class="container-page pt-6 sm:pt-10">
-    <nav aria-label="Ruta de navegación" class="mb-6 text-sm text-stone">
+    <nav aria-label="Ruta de navegación" class="mb-6 text-sm text-stone sm:mb-8">
       <ol class="flex flex-wrap items-center gap-2">
-        <li><a href="/" class="hover:text-ink hover:underline">Inicio</a></li>
-        <li aria-hidden="true">/</li>
-        <li><a href="/catalogo" class="hover:text-ink hover:underline">Catálogo</a></li>
-        <li aria-hidden="true">/</li>
+        <li><a href="/" class="link-draw hover:text-ink">Inicio</a></li>
+        <li aria-hidden="true" class="text-linen">/</li>
+        <li><a href="/catalogo" class="link-draw hover:text-ink">Catálogo</a></li>
+        <li aria-hidden="true" class="text-linen">/</li>
         <li>
-          <a href={catalogUrl({ categoria: product.category_slug })} class="hover:text-ink hover:underline">{product.category_name}</a>
+          <a href={catalogUrl({ categoria: product.category_slug })} class="link-draw hover:text-ink">{product.category_name}</a>
         </li>
       </ol>
     </nav>
 
-    <div class="grid gap-8 md:grid-cols-2 md:gap-12 lg:gap-16">
-      <div class="min-w-0 md:sticky md:top-24 md:self-start">
+    <div class="grid gap-8 md:grid-cols-[1.1fr_1fr] md:gap-12 lg:gap-20">
+      <div class="min-w-0 md:sticky md:top-28 md:self-start">
         <ProductGallery images={product.images} productName={product.name} dimmed={soldOut} />
       </div>
 
-      <div class="flex min-w-0 flex-col gap-6">
-        <div class="flex flex-col gap-3">
-          <a href={catalogUrl({ categoria: product.category_slug })} class="eyebrow self-start hover:underline">{product.category_name}</a>
-          <h1 class="text-3xl leading-tight sm:text-4xl lg:text-5xl">{product.name}</h1>
-          <div class="flex flex-wrap items-center gap-3">
-            <p class="text-2xl">{formatCurrency(product.price)}</p>
+      <div class="flex min-w-0 flex-col gap-7">
+        <div class="flex flex-col items-start gap-4">
+          <a href={catalogUrl({ categoria: product.category_slug })} class="eyebrow hover:text-clay-deep">{product.category_name}</a>
+          <h1 class="text-4xl leading-[1.08] sm:text-5xl">{product.name}</h1>
+          <div class="flex flex-wrap items-center gap-4">
+            <p class="font-display text-3xl sm:text-4xl">{formatCurrency(product.price)}</p>
             <AvailabilityBadge availability={product.availability} />
           </div>
         </div>
 
         {product.description && (
-          <p class="leading-relaxed whitespace-pre-line text-stone">{product.description}</p>
+          <p class="text-[1.0625rem] leading-relaxed whitespace-pre-line text-stone">{product.description}</p>
         )}
 
-        <div class="flex flex-col gap-3 border-t border-linen pt-6">
+        <div class="flex flex-col gap-3 rounded-[1.75rem] border border-linen bg-card p-5 shadow-soft sm:p-6">
           <AddToCart
             client:load
             soldOut={soldOut}
@@ -132,29 +134,27 @@ const breadcrumbLd = {
             }}
           />
           {whatsapp && (
-            <a href={whatsapp} target="_blank" rel="noopener noreferrer" class="btn btn-outline min-h-12">
+            <a href={whatsapp} target="_blank" rel="noopener noreferrer" class={buttonVariants({ variant: 'outline', size: 'lg' })}>
               <SocialIcon name="whatsapp" class="size-5" />
               {soldOut ? 'Preguntar cuándo vuelve' : 'Consultar por WhatsApp'}
             </a>
           )}
+          <p class="flex items-center justify-center gap-2 pt-1 text-center text-xs text-stone">
+            <Sparkle class="size-2.5 text-clay" />
+            Sin pagos en línea: confirmas tu pedido por WhatsApp
+          </p>
         </div>
 
-        <ul class="flex flex-col gap-3 rounded-[var(--radius-card)] bg-sand/60 p-5 text-sm text-ink/80">
-          <li class="flex gap-3">
-            <Truck class="size-5 shrink-0 text-sage" stroke-width={1.5} />
-            <span>{site.shipping.summary}. El costo se confirma por WhatsApp según tu ubicación.</span>
-          </li>
-          <li class="flex gap-3">
-            <Store class="size-5 shrink-0 text-sage" stroke-width={1.5} />
-            <span>{site.shipping.pickup}</span>
-          </li>
-        </ul>
+        <div>
+          <h2 class="sr-only">Información de compra</h2>
+          <ProductInfoAccordion client:visible />
+        </div>
       </div>
     </div>
   </div>
 
   {product.related.length > 0 && (
-    <section class="container-page pt-16 sm:pt-24">
+    <section class="container-page pt-20 sm:pt-28">
       <SectionHeading
         eyebrow="También te puede gustar"
         title={`Más en ${product.category_name}`}

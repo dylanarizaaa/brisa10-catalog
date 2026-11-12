@@ -112,7 +112,8 @@ Cliente ─► Cloudflare (Astro en el servidor + caché de ~1 min) ─► Supab
 ```
 
 - **Render en el servidor con caché corta** (`routeRules` en `astro.config.mjs`): el HTML llega completo, casi sin JavaScript, y un cambio hecho en la app administrativa se refleja en alrededor de un minuto sin reconstruir el sitio.
-- **React solo en islas interactivas** (carrito y pedido, fases 5 y 6). El resto son componentes Astro sin JavaScript; el menú móvil usa la API `popover` del navegador.
+- **React solo en islas interactivas:** búsqueda y orden del catálogo, botón de agregar y acordeón del producto, carrito y pedido. El resto son componentes Astro sin JavaScript; el menú móvil usa la API `popover` del navegador. El inicio no carga React.
+- **shadcn/ui** (`src/components/ui/`) para botones, campos, selector, grupo de opciones y acordeón, con su tema apuntando a la paleta de la tienda. En archivos `.astro` los enlaces con aspecto de botón usan `buttonVariants()`.
 - **Supabase por funciones RPC** (`get_public_catalog`, `get_public_product`, `get_public_categories`, `get_public_business`, `check_public_cart`). El rol `anon` no puede leer ninguna tabla; las funciones nunca devuelven stock exacto ni costos. Se llaman con `fetch`, sin el SDK.
 - Si una consulta falla, la sección correspondiente no se muestra y el resto de la página sigue funcionando. Las respuestas con error no se guardan en caché.
 - **Filtros en la URL** (`/catalogo?q=…&categoria=…&orden=…&pagina=…`): se resuelven en el servidor, funcionan sin JavaScript y se pueden compartir. Las búsquedas llevan `noindex`.
@@ -125,7 +126,7 @@ src/
 ├─ components/
 │  ├─ layout/           Header, Footer, logotipo, botón flotante de WhatsApp
 │  ├─ home/             Secciones de la página de inicio
-│  ├─ products/         Tarjeta, grilla, filtros, paginación, galería y disponibilidad
+│  ├─ products/         Tarjeta, grilla, búsqueda y orden, categorías, paginación, galería
 │  ├─ cart/             Islas React del carrito
 │  ├─ checkout/         Formulario del pedido
 │  └─ common/           Piezas reutilizables
@@ -142,17 +143,28 @@ src/
 
 ## Sistema de diseño
 
-Definido en `src/styles/global.css`.
+Definido en `src/styles/global.css`. Las variables de shadcn/ui (`--primary`, `--border`, `--ring`…) apuntan a estos mismos colores, así que sus componentes heredan la identidad de la tienda.
 
 | Token | Valor | Uso |
 |-------|-------|-----|
 | `cream` | `#faf6f0` | Fondo |
 | `sand` / `linen` | `#efe6da` / `#e2d6c6` | Superficies, marcos de foto, bordes |
-| `ink` / `stone` | `#2b2622` / `#6b625a` | Texto principal y secundario |
-| `clay` | `#9c4f36` | Acento: botones y enlaces |
-| `sage` | `#4f5d48` | Secundario |
+| `ink` / `stone` | `#2b2622` / `#6b625a` | Texto principal y secundario; bandas oscuras |
+| `clay` | `#9c4f36` | Acento: botones, enlaces, cinta animada |
+| `sage` | `#4f5d48` | Secundario: entregas y confirmaciones |
 
-Tipografía: **Fraunces** (títulos) y **DM Sans** (texto), incluidas en el proyecto. Fotos de producto en proporción 4:5. Los colores de texto cumplen contraste AA.
+- **Tipografía:** Fraunces (títulos, precios) y DM Sans (texto), incluidas en el proyecto.
+- **Motivo visual:** el arco (`.arch`), presente en el banner, las categorías, las cabeceras de página y los estados vacíos; destellos de cuatro puntas como detalle.
+- **Botones** (`src/components/ui/button.tsx`): forma de píldora y altura táctil. Variantes `default` (terracota), `outline`, `secondary`, `dark`, `light`, `whatsapp`, `ghost` y `link`.
+- **Fotos de producto** en proporción 4:5. En el banner del inicio se usan las fotos de los productos destacados (o los más recientes); si no hay ninguno con foto, aparece la ilustración de respaldo.
+- **Movimiento:** apariciones suaves al hacer scroll, cinta de categorías, sello giratorio y transiciones al pasar el cursor. Todo se desactiva con la preferencia "reducir movimiento" del sistema.
+- Los colores de texto cumplen contraste AA.
+
+## Agregar componentes de interfaz
+
+```bash
+npx shadcn@latest add <componente>
+```
 
 ## Contenido pendiente de reemplazar
 
@@ -161,7 +173,7 @@ Tipografía: **Fraunces** (títulos) y **DM Sans** (texto), incluidas en el proy
 | Enlaces de Instagram, TikTok y Facebook | `src/config/site.ts` → `social` |
 | Logotipo (hoy es el nombre en texto) | `src/components/layout/Logo.astro` y `public/favicon.svg` |
 | Imagen al compartir el sitio en redes (1200 × 630 px) | `public/og-default.png` |
-| Foto del banner principal (hoy es una ilustración) | `src/assets/hero.svg` y `src/components/home/Hero.astro` |
+| Ilustración de respaldo del banner (solo se ve si ningún producto tiene foto) | `src/assets/hero.svg` |
 | Texto de presentación del negocio | `src/components/home/About.astro` |
 | Nombre, dirección, teléfono y correo | App administrativa → Configuración → Negocio |
 | Costo de envío (hoy "por confirmar") | `src/config/site.ts` → `shipping` |

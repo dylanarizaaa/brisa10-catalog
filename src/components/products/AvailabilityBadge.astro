@@ -3,8 +3,10 @@ import type { Availability } from '@/types/product'
 
 interface Props {
   availability: Availability
+  /** Sobre una foto: fondo sólido para que se lea encima de cualquier imagen. */
+  onImage?: boolean
 }
-const { availability } = Astro.props
+const { availability, onImage = false } = Astro.props
 const labels: Record<Availability, string> = {
   disponible: 'Disponible',
   ultimas_unidades: 'Últimas unidades',
@@ -14,11 +16,13 @@ const labels: Record<Availability, string> = {
 
 <span
   class:list={[
-    'inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium',
+    'inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium',
+    onImage && 'shadow-soft',
     availability === 'disponible' && 'bg-sage-soft text-sage',
-    availability === 'ultimas_unidades' && 'bg-clay-soft text-clay-deep',
+    availability === 'ultimas_unidades' && (onImage ? 'bg-cream text-clay-deep' : 'bg-clay-soft text-clay-deep'),
     availability === 'agotado' && 'bg-ink text-cream',
   ]}
 >
+  <span class:list={['size-1.5 rounded-full', availability === 'agotado' ? 'bg-cream/70' : 'bg-current']} aria-hidden="true"></span>
   {labels[availability]}
 </span>

@@ -2,6 +2,7 @@
 import '@/styles/global.css'
 import dmSans from '@fontsource-variable/dm-sans/files/dm-sans-latin-wght-normal.woff2?url'
 import fraunces from '@fontsource-variable/fraunces/files/fraunces-latin-wght-normal.woff2?url'
+import AnnouncementBar from '@/components/layout/AnnouncementBar.astro'
 import Footer from '@/components/layout/Footer.astro'
 import Header from '@/components/layout/Header.astro'
 import WhatsAppFab from '@/components/layout/WhatsAppFab.astro'
@@ -60,16 +61,65 @@ const ogImage = image ?? new URL('/og-default.png', Astro.site).href
     <link rel="preload" as="font" type="font/woff2" href={dmSans} crossorigin />
     {supabaseOrigin && <link rel="preconnect" href={supabaseOrigin} />}
     <slot name="head" />
+    <!-- Activa las apariciones al hacer scroll solo si el navegador puede mostrarlas después. -->
+    <script is:inline>
+      if ('IntersectionObserver' in window && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        document.documentElement.classList.add('reveal-on')
+      }
+    </script>
   </head>
   <body class="flex min-h-dvh flex-col">
     <a href="#contenido" class="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 focus:rounded-full focus:bg-ink focus:px-4 focus:py-2 focus:text-cream">
       Saltar al contenido
     </a>
+    <AnnouncementBar />
     <Header businessName={name} />
     <main id="contenido" class="flex-1">
       <slot />
     </main>
     <Footer business={business} />
     {!hideWhatsAppFab && <WhatsAppFab businessName={name} />}
+    <!-- Anuncios para lectores de pantalla (p. ej. "agregado al carrito"). -->
+    <p id="live-region" class="sr-only" role="status" aria-live="polite"></p>
+
+    <script>
+      import { addToCart } from '@/lib/cart'
+
+      // Apariciones al hacer scroll.
+      const pending = document.querySelectorAll<HTMLElement>('[data-reveal]')
+      if (document.documentElement.classList.contains('reveal-on')) {
+        const observer = new IntersectionObserver(
+          (entries) => {
+            for (const entry of entries) {
+              // También se muestra lo que quedó arriba de la pantalla (saltos a un ancla, scroll muy rápido).
+              if (!entry.isIntersecting && entry.boundingClientRect.top >= 0) continue
+              entry.target.classList.add('is-visible')
+              observer.unobserve(entry.target)
+            }
+          },
+          { rootMargin: '0px 0px -8% 0px', threshold: 0.08 },
+        )
+        pending.forEach((element) => observer.observe(element))
+      }
+
+      // Botón "agregar" de las tarjetas de producto (un solo listener para toda la página).
+      const live = document.getElementById('live-region')
+      document.addEventListener('click', (event) => {
+        const button = (event.target as HTMLElement).closest<HTMLButtonElement>('[data-quick-add]')
+        if (!button) return
+        event.preventDefault()
+        const product = JSON.parse(button.dataset.quickAdd ?? '{}')
+        const total = addToCart(product, 1)
+        if (live) {
+          live.textContent =
+            total > 0
+              ? `${product.name} agregado al carrito. Llevas ${total}.`
+              : 'Tu carrito ya tiene el máximo de productos distintos.'
+        }
+        if (total === 0) return
+        button.dataset.added = 'true'
+        window.setTimeout(() => delete button.dataset.added, 1600)
+      })
+    </script>
   </body>
 </html>

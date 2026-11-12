@@ -1,21 +1,17 @@
 ---
 import { CartView } from '@/components/cart/CartView'
+import PageHeader from '@/components/common/PageHeader.astro'
 import MainLayout from '@/layouts/MainLayout.astro'
 
 ---
 
 <MainLayout title="Tu carrito" description="Revisa los productos de tu pedido antes de enviarlo por WhatsApp." noindex hideWhatsAppFab>
-  <div class="container-page pt-8 pb-4 sm:pt-12">
-    <nav aria-label="Ruta de navegación" class="mb-4 text-sm text-stone">
-      <ol class="flex flex-wrap items-center gap-2">
-        <li><a href="/" class="hover:text-ink hover:underline">Inicio</a></li>
-        <li aria-hidden="true">/</li>
-        <li aria-current="page" class="text-ink">Carrito</li>
-      </ol>
-    </nav>
-    <h1 class="text-4xl sm:text-5xl">Tu carrito</h1>
-  </div>
-  <div class="container-page py-6 lg:py-10">
+  <PageHeader
+    title="Tu carrito"
+    description="Revisa tu selección. Verificamos la disponibilidad antes de continuar."
+    crumbs={[{ label: 'Inicio', href: '/' }, { label: 'Carrito' }]}
+  />
+  <div class="container-page py-8 lg:py-12">
     <!-- El carrito vive en el navegador (localStorage): esta parte se pinta en el cliente. -->
     <CartView client:only="react">
       <p slot="fallback" class="py-16 text-center text-stone">Cargando…</p>

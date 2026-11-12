@@ -1,6 +1,7 @@
 ---
-import { MapPin, Store, Truck } from '@lucide/astro'
+import { MessageCircle, Store, Truck } from '@lucide/astro'
 import SocialIcon from '@/components/common/SocialIcon.astro'
+import { buttonVariants } from '@/components/ui/button'
 import { site } from '@/config/site'
 import { whatsappLink } from '@/lib/whatsapp'
 
@@ -8,43 +9,39 @@ interface Props {
   businessName: string
 }
 const whatsapp = whatsappLink(`Hola ${Astro.props.businessName}, quiero saber el costo de envío a mi barrio.`)
+const items = [
+  { icon: Truck, title: 'A domicilio', text: `Costo del envío: ${site.shipping.costLabel.toLowerCase()} según tu ubicación.` },
+  { icon: Store, title: 'Recoge en tienda', text: site.shipping.pickup },
+  { icon: MessageCircle, title: 'Sin pagos en línea', text: 'Armas tu pedido aquí y lo confirmamos contigo por WhatsApp: disponibilidad, entrega y forma de pago.' },
+]
 ---
 
-<section id="envios" class="container-page scroll-mt-20 py-12 sm:py-16">
-  <div class="grid overflow-hidden rounded-[2rem] bg-sage-soft md:grid-cols-2">
-    <div class="flex flex-col items-start gap-5 p-8 sm:p-12">
+<section id="envios" class="container-page scroll-mt-24 pb-16 sm:pb-24">
+  <div class="grain relative grid overflow-hidden rounded-[2rem] bg-sage-soft md:grid-cols-2" data-reveal>
+    <div class="arch pointer-events-none absolute -bottom-32 -left-16 h-80 w-64 border border-sage/15" aria-hidden="true"></div>
+    <div class="relative flex flex-col items-start gap-5 p-8 sm:p-12 lg:p-14">
       <p class="eyebrow !text-sage">Entregas</p>
-      <h2 class="text-3xl sm:text-4xl">{site.shipping.summary}</h2>
-      <p class="leading-relaxed text-ink/80">{site.shipping.detail}</p>
+      <h2 class="text-[2rem] leading-tight sm:text-5xl">{site.shipping.summary}</h2>
+      <p class="max-w-md leading-relaxed text-ink/80">{site.shipping.detail}</p>
       {whatsapp && (
-        <a href={whatsapp} target="_blank" rel="noopener noreferrer" class="btn btn-primary mt-2">
+        <a href={whatsapp} target="_blank" rel="noopener noreferrer" class:list={[buttonVariants({ variant: 'whatsapp', size: 'lg' }), 'mt-2']}>
           <SocialIcon name="whatsapp" class="size-5" />
           Consultar por WhatsApp
         </a>
       )}
     </div>
-    <ul class="flex flex-col justify-center gap-6 border-t border-sage/20 p-8 sm:p-12 md:border-t-0 md:border-l">
-      <li class="flex gap-4">
-        <Truck class="mt-0.5 size-6 shrink-0 text-sage" stroke-width={1.5} />
-        <div>
-          <h3 class="font-sans text-base font-medium tracking-normal">A domicilio</h3>
-          <p class="text-sm leading-relaxed text-ink/75">Costo del envío: <strong class="font-medium">{site.shipping.costLabel.toLowerCase()}</strong> según tu ubicación.</p>
-        </div>
-      </li>
-      <li class="flex gap-4">
-        <Store class="mt-0.5 size-6 shrink-0 text-sage" stroke-width={1.5} />
-        <div>
-          <h3 class="font-sans text-base font-medium tracking-normal">Recoge en tienda</h3>
-          <p class="text-sm leading-relaxed text-ink/75">{site.shipping.pickup}</p>
-        </div>
-      </li>
-      <li class="flex gap-4">
-        <MapPin class="mt-0.5 size-6 shrink-0 text-sage" stroke-width={1.5} />
-        <div>
-          <h3 class="font-sans text-base font-medium tracking-normal">Sin pagos en línea</h3>
-          <p class="text-sm leading-relaxed text-ink/75">Armas tu pedido aquí y lo confirmamos contigo por WhatsApp: disponibilidad, entrega y forma de pago.</p>
-        </div>
-      </li>
+    <ul class="relative flex flex-col justify-center gap-3 p-5 sm:p-8 lg:p-10">
+      {items.map(({ icon: Icon, title, text }) => (
+        <li class="flex gap-4 rounded-2xl bg-cream/70 p-5 backdrop-blur-sm">
+          <span class="grid size-11 shrink-0 place-items-center rounded-full bg-sage text-cream">
+            <Icon class="size-5" stroke-width={1.5} />
+          </span>
+          <div>
+            <h3 class="font-sans text-base font-medium tracking-normal">{title}</h3>
+            <p class="mt-0.5 text-sm leading-relaxed text-ink/75">{text}</p>
+          </div>
+        </li>
+      ))}
     </ul>
   </div>
 </section>

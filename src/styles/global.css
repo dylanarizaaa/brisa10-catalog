@@ -1,4 +1,6 @@
 @import 'tailwindcss';
+@import 'tw-animate-css';
+@import 'shadcn/tailwind.css';
 @import '@fontsource-variable/fraunces';
 @import '@fontsource-variable/fraunces/wght-italic.css';
 @import '@fontsource-variable/dm-sans';
@@ -18,21 +20,104 @@
   --color-clay-soft: #f3ddd3;
   --color-sage: #4f5d48; /* AA sobre sage-soft */
   --color-sage-soft: #e3e8dd;
+  --color-whatsapp: #1f7a4d;
 
   --radius-card: 1.25rem;
   --ease-soft: cubic-bezier(0.22, 1, 0.36, 1);
+  --shadow-soft: 0 1px 2px rgb(43 38 34 / 0.04), 0 8px 24px -8px rgb(43 38 34 / 0.12);
+  --shadow-lift: 0 2px 4px rgb(43 38 34 / 0.05), 0 18px 40px -12px rgb(43 38 34 / 0.22);
+
+  --animate-marquee: marquee 38s linear infinite;
+  --animate-spin-slow: spin 28s linear infinite;
+  --animate-float: float 7s ease-in-out infinite;
+  --animate-rise: rise 700ms var(--ease-soft) both;
+  --animate-pop: pop 380ms var(--ease-soft);
+
+  @keyframes marquee {
+    to {
+      transform: translateX(-50%);
+    }
+  }
+  @keyframes float {
+    50% {
+      transform: translateY(-8px);
+    }
+  }
+  @keyframes rise {
+    from {
+      transform: translateY(18px);
+    }
+  }
+  @keyframes pop {
+    40% {
+      transform: scale(1.35);
+    }
+  }
+}
+
+/* Tema de shadcn/ui: sus variables apuntan a la paleta de la tienda. */
+:root {
+  --radius: 0.875rem;
+  --background: var(--color-cream);
+  --foreground: var(--color-ink);
+  --card: #fffdf9;
+  --card-foreground: var(--color-ink);
+  --popover: #fffdf9;
+  --popover-foreground: var(--color-ink);
+  --primary: var(--color-clay);
+  --primary-foreground: #ffffff;
+  --secondary: var(--color-sand);
+  --secondary-foreground: var(--color-ink);
+  --muted: var(--color-sand);
+  --muted-foreground: var(--color-stone);
+  --accent: var(--color-clay-soft);
+  --accent-foreground: var(--color-ink);
+  --destructive: var(--color-clay-deep);
+  --border: var(--color-linen);
+  --input: #d6c8b6;
+  --ring: var(--color-clay);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
 }
 
 @layer base {
+  * {
+    @apply border-border;
+  }
+
   html {
     scroll-behavior: smooth;
     -webkit-text-size-adjust: 100%;
   }
 
   body {
-    background-color: var(--color-cream);
-    color: var(--color-ink);
-    font-family: var(--font-sans);
+    @apply bg-background font-sans text-foreground;
     -webkit-font-smoothing: antialiased;
   }
 
@@ -51,6 +136,16 @@
     border-radius: 4px;
   }
 
+  button:not(:disabled),
+  [role='button']:not(:disabled) {
+    cursor: pointer;
+  }
+
+  ::selection {
+    background: var(--color-clay);
+    color: #fff;
+  }
+
   @media (prefers-reduced-motion: reduce) {
     html {
       scroll-behavior: auto;
@@ -58,7 +153,7 @@
     *,
     *::before,
     *::after {
-      animation-duration: 0.01ms !important;
+      animation: none !important;
       transition-duration: 0.01ms !important;
     }
   }
@@ -67,7 +162,7 @@
 @layer components {
   .container-page {
     width: 100%;
-    max-width: 76rem;
+    max-width: 78rem;
     margin-inline: auto;
     padding-inline: 1.25rem;
   }
@@ -77,47 +172,77 @@
     }
   }
 
-  .btn {
-    display: inline-flex;
-    min-height: 2.75rem;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    border-radius: 999px;
-    padding: 0.625rem 1.5rem;
-    font-size: 0.9375rem;
-    font-weight: 500;
-    transition:
-      background-color 180ms var(--ease-soft),
-      color 180ms var(--ease-soft),
-      border-color 180ms var(--ease-soft),
-      transform 180ms var(--ease-soft);
-  }
-  .btn:active {
-    transform: scale(0.98);
-  }
-  .btn-primary {
-    background-color: var(--color-clay);
-    color: #fff;
-  }
-  .btn-primary:hover {
-    background-color: var(--color-clay-deep);
-  }
-  .btn-outline {
-    border: 1px solid var(--color-ink);
-    color: var(--color-ink);
-  }
-  .btn-outline:hover {
-    background-color: var(--color-ink);
-    color: var(--color-cream);
-  }
-
   /* Rótulo pequeño en mayúsculas sobre los títulos de sección. */
   .eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.625rem;
     font-size: 0.75rem;
     font-weight: 600;
-    letter-spacing: 0.16em;
+    letter-spacing: 0.18em;
     text-transform: uppercase;
     color: var(--color-clay);
+  }
+  .eyebrow::before {
+    content: '';
+    width: 1.75rem;
+    height: 1px;
+    background: currentColor;
+  }
+  .eyebrow-plain::before {
+    display: none;
+  }
+
+  /* Textura de papel muy sutil para los fondos grandes. */
+  .grain {
+    position: relative;
+    isolation: isolate;
+  }
+  .grain::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    opacity: 0.5;
+    mix-blend-mode: multiply;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .45 0 0 0 0 .38 0 0 0 0 .3 0 0 0 .09 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  /* Forma de arco: el motivo visual de la tienda. */
+  .arch {
+    border-radius: 999px 999px var(--radius-card) var(--radius-card);
+  }
+
+  /* Enlace con subrayado que se dibuja al pasar el cursor. */
+  .link-draw {
+    background: linear-gradient(currentColor, currentColor) 0 100% / 0 1px no-repeat;
+    transition: background-size 260ms var(--ease-soft);
+  }
+  .link-draw:hover {
+    background-size: 100% 1px;
+  }
+}
+
+/*
+ * Aparición suave al hacer scroll. Solo se oculta contenido si el navegador
+ * ejecutó el script que luego lo muestra (clase .reveal-on en <html>).
+ */
+.reveal-on [data-reveal] {
+  opacity: 0;
+  transform: translateY(22px);
+  transition:
+    opacity 700ms var(--ease-soft),
+    transform 700ms var(--ease-soft);
+  transition-delay: var(--reveal-delay, 0ms);
+}
+.reveal-on [data-reveal].is-visible {
+  opacity: 1;
+  transform: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .reveal-on [data-reveal] {
+    opacity: 1;
+    transform: none;
   }
 }

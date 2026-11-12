@@ -1,8 +1,14 @@
-import { CircleCheck, Loader2, Store, Truck } from 'lucide-react'
+import { ArrowLeft, CircleCheck, Loader2, PencilLine, Store, Truck } from 'lucide-react'
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { CartNotices } from '@/components/cart/CartNotices'
 import { EmptyCart } from '@/components/cart/CartView'
 import { OrderSummary } from '@/components/cart/OrderSummary'
+import SocialIconWhatsApp from '@/components/common/WhatsAppIcon'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
+import { Textarea } from '@/components/ui/textarea'
 import { site } from '@/config/site'
 import { useCart } from '@/hooks/useCart'
 import { issueMessages, useCartCheck } from '@/hooks/useCartCheck'
@@ -17,15 +23,12 @@ interface Props {
 
 const emptyCustomer: OrderCustomer = { name: '', phone: '', delivery: 'recoger', address: '', neighborhood: '', notes: '' }
 
-const inputClass =
-  'h-12 w-full rounded-2xl border border-linen bg-white/70 px-4 text-base placeholder:text-stone/70 focus:border-ink focus:outline-none aria-[invalid=true]:border-clay'
-
 function Field({ id, label, optional, error, children }: { id: string; label: string; optional?: boolean; error?: string; children: ReactNode }) {
   return (
-    <div className="flex flex-col gap-1.5">
-      <label htmlFor={id} className="text-sm font-medium">
+    <div className="flex flex-col gap-2">
+      <Label htmlFor={id}>
         {label} {optional && <span className="font-normal text-stone">(opcional)</span>}
-      </label>
+      </Label>
       {children}
       {error && (
         <p id={`${id}-error`} className="text-sm text-clay-deep">
@@ -33,6 +36,17 @@ function Field({ id, label, optional, error, children }: { id: string; label: st
         </p>
       )}
     </div>
+  )
+}
+
+function StepTitle({ step, children }: { step: number; children: ReactNode }) {
+  return (
+    <legend className="float-left mb-5 flex w-full items-center gap-3 font-display text-[1.75rem]">
+      <span className="grid size-9 place-items-center rounded-full bg-clay font-sans text-sm font-semibold text-white" aria-hidden="true">
+        {step}
+      </span>
+      {children}
+    </legend>
   )
 }
 
@@ -60,16 +74,18 @@ export function OrderForm({ businessName }: Props) {
 
   if (sent) {
     return (
-      <div className="flex flex-col items-center gap-4 rounded-[var(--radius-card)] bg-sage-soft px-6 py-16 text-center">
-        <CircleCheck className="size-10 text-sage" strokeWidth={1.5} />
-        <h2 className="text-2xl">¡Gracias! Recibimos tu solicitud</h2>
-        <p className="max-w-md text-ink/80">
+      <div className="grain flex flex-col items-center gap-5 rounded-[2rem] bg-sage-soft px-6 py-16 text-center sm:py-20">
+        <span className="arch grid h-24 w-20 place-items-center bg-sage text-cream">
+          <CircleCheck className="size-9" strokeWidth={1.5} />
+        </span>
+        <h2 className="text-3xl sm:text-4xl">¡Gracias! Recibimos tu solicitud</h2>
+        <p className="max-w-md leading-relaxed text-ink/80">
           Te responderemos por WhatsApp para confirmar disponibilidad, entrega y forma de pago. El pedido queda en firme
           cuando lo confirmemos contigo.
         </p>
-        <a href="/catalogo" className="btn btn-primary">
-          Seguir viendo el catálogo
-        </a>
+        <Button asChild size="lg">
+          <a href="/catalogo">Seguir viendo el catálogo</a>
+        </Button>
       </div>
     )
   }
@@ -115,8 +131,8 @@ export function OrderForm({ businessName }: Props) {
   }
 
   return (
-    <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_24rem] lg:gap-12">
-      <form onSubmit={handleSubmit} noValidate className="flex min-w-0 flex-col gap-8">
+    <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_25rem] lg:gap-12">
+      <form onSubmit={handleSubmit} noValidate className="flex min-w-0 flex-col gap-6">
         <div id="order-notices" className="empty:hidden">
           <CartNotices check={check} onRetry={() => void check.recheck()} />
           {blocked && (
@@ -137,151 +153,163 @@ export function OrderForm({ businessName }: Props) {
           )}
         </div>
 
-        <fieldset className="flex flex-col gap-4">
-          <legend className="mb-4 font-display text-2xl">Tus datos</legend>
-          <div className="grid gap-4 sm:grid-cols-2">
+        <fieldset className="rounded-[1.75rem] border border-linen bg-card p-5 shadow-soft sm:p-8">
+          <StepTitle step={1}>Tus datos</StepTitle>
+          <div className="clear-both grid gap-5 sm:grid-cols-2">
             <Field id="order-name" label="Nombre" error={errors.name}>
-              <input
+              <Input
                 {...fieldProps('name', 'order-name')}
                 type="text"
                 autoComplete="name"
                 maxLength={orderLimits.name}
-                className={inputClass}
+                placeholder="¿Cómo te llamas?"
                 onChange={(event) => update('name', event.target.value)}
               />
             </Field>
             <Field id="order-phone" label="Número de contacto" error={errors.phone}>
-              <input
+              <Input
                 {...fieldProps('phone', 'order-phone')}
                 type="tel"
                 inputMode="tel"
                 autoComplete="tel"
                 maxLength={orderLimits.phone}
                 placeholder="300 123 4567"
-                className={inputClass}
                 onChange={(event) => update('phone', event.target.value)}
               />
             </Field>
           </div>
         </fieldset>
 
-        <fieldset className="flex flex-col gap-4">
-          <legend className="mb-4 font-display text-2xl">Entrega</legend>
-          <div className="grid gap-3 sm:grid-cols-2" role="radiogroup" aria-label="Modalidad de entrega">
-            {deliveryOptions.map(({ value, title, text, icon: Icon }) => (
-              <label
-                key={value}
-                className="flex cursor-pointer gap-3 rounded-2xl border border-linen p-4 transition-colors has-[:checked]:border-clay has-[:checked]:bg-clay-soft/50 has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-clay"
-              >
-                <input
-                  type="radio"
-                  name="delivery"
-                  value={value}
-                  checked={customer.delivery === value}
-                  onChange={() => update('delivery', value)}
-                  className="sr-only"
-                />
-                <Icon className="mt-0.5 size-5 shrink-0 text-sage" strokeWidth={1.5} />
-                <span className="flex flex-col gap-0.5">
-                  <span className="text-[0.9375rem] font-medium">{title}</span>
-                  <span className="text-sm text-stone">{text}</span>
-                </span>
-              </label>
-            ))}
+        <fieldset className="rounded-[1.75rem] border border-linen bg-card p-5 shadow-soft sm:p-8">
+          <StepTitle step={2}>Entrega</StepTitle>
+          <div className="clear-both flex flex-col gap-5">
+            <RadioGroup
+              value={customer.delivery}
+              onValueChange={(value) => update('delivery', value)}
+              aria-label="Modalidad de entrega"
+              className="grid gap-3 sm:grid-cols-2"
+            >
+              {deliveryOptions.map(({ value, title, text, icon: Icon }) => (
+                <Label
+                  key={value}
+                  htmlFor={`delivery-${value}`}
+                  className="flex cursor-pointer items-start gap-3 rounded-2xl border border-input bg-cream/60 p-4 leading-normal font-normal transition-colors select-auto hover:border-clay/60 has-data-checked:border-clay has-data-checked:bg-clay-soft/50"
+                >
+                  <RadioGroupItem id={`delivery-${value}`} value={value} className="mt-0.5" />
+                  <span className="flex flex-1 flex-col gap-1">
+                    <span className="flex items-center justify-between gap-2 text-[0.9375rem] font-medium">
+                      {title}
+                      <Icon className="size-5 shrink-0 text-sage" strokeWidth={1.5} />
+                    </span>
+                    <span className="text-sm text-stone">{text}</span>
+                  </span>
+                </Label>
+              ))}
+            </RadioGroup>
+
+            {customer.delivery === 'domicilio' && (
+              <div className="grid animate-in gap-5 duration-300 fade-in slide-in-from-top-1 sm:grid-cols-2">
+                <Field id="order-address" label="Dirección" error={errors.address}>
+                  <Input
+                    {...fieldProps('address', 'order-address')}
+                    type="text"
+                    autoComplete="street-address"
+                    maxLength={orderLimits.address}
+                    placeholder="Calle 123 # 45-67, apto 301"
+                    onChange={(event) => update('address', event.target.value)}
+                  />
+                </Field>
+                <Field id="order-neighborhood" label="Barrio o localidad" error={errors.neighborhood}>
+                  <Input
+                    {...fieldProps('neighborhood', 'order-neighborhood')}
+                    type="text"
+                    maxLength={orderLimits.neighborhood}
+                    placeholder="Chapinero"
+                    onChange={(event) => update('neighborhood', event.target.value)}
+                  />
+                </Field>
+              </div>
+            )}
+
+            <Field id="order-notes" label="Observaciones" optional error={errors.notes}>
+              <Textarea
+                {...fieldProps('notes', 'order-notes')}
+                rows={3}
+                maxLength={orderLimits.notes}
+                placeholder="Horario de entrega, empaque de regalo, dudas…"
+                onChange={(event) => update('notes', event.target.value)}
+              />
+            </Field>
           </div>
-
-          {customer.delivery === 'domicilio' && (
-            <div className="grid gap-4 sm:grid-cols-2">
-              <Field id="order-address" label="Dirección" error={errors.address}>
-                <input
-                  {...fieldProps('address', 'order-address')}
-                  type="text"
-                  autoComplete="street-address"
-                  maxLength={orderLimits.address}
-                  placeholder="Calle 123 # 45-67, apto 301"
-                  className={inputClass}
-                  onChange={(event) => update('address', event.target.value)}
-                />
-              </Field>
-              <Field id="order-neighborhood" label="Barrio o localidad" error={errors.neighborhood}>
-                <input
-                  {...fieldProps('neighborhood', 'order-neighborhood')}
-                  type="text"
-                  maxLength={orderLimits.neighborhood}
-                  placeholder="Chapinero"
-                  className={inputClass}
-                  onChange={(event) => update('neighborhood', event.target.value)}
-                />
-              </Field>
-            </div>
-          )}
-
-          <Field id="order-notes" label="Observaciones" optional error={errors.notes}>
-            <textarea
-              {...fieldProps('notes', 'order-notes')}
-              rows={3}
-              maxLength={orderLimits.notes}
-              placeholder="Horario de entrega, empaque de regalo, dudas…"
-              className={`${inputClass} h-auto py-3`}
-              onChange={(event) => update('notes', event.target.value)}
-            />
-          </Field>
         </fieldset>
 
         {!orderLink && (
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-            <button type="submit" className="btn btn-primary min-h-12 disabled:opacity-60" disabled={submitting || blocked}>
-              {submitting && <Loader2 className="size-4 animate-spin" />}
+          <div className="flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <Button asChild variant="ghost" size="lg">
+              <a href="/carrito">
+                <ArrowLeft />
+                Volver al carrito
+              </a>
+            </Button>
+            <Button type="submit" size="lg" disabled={submitting || blocked}>
+              {submitting && <Loader2 className="animate-spin" />}
               {submitting ? 'Verificando disponibilidad…' : 'Revisar y preparar pedido'}
-            </button>
-            <a href="/carrito" className="btn btn-outline min-h-12">
-              Volver al carrito
-            </a>
+            </Button>
           </div>
         )}
 
         {orderLink && (
-          <div ref={readyRef} tabIndex={-1} className="flex flex-col gap-4 rounded-[var(--radius-card)] border border-sage/40 bg-sage-soft p-6 outline-none">
-            <h2 className="text-2xl">Tu pedido está listo para enviar</h2>
-            <p className="text-sm leading-relaxed text-ink/80">
-              Verificamos precios y disponibilidad. Al tocar el botón se abre WhatsApp con el resumen escrito:{' '}
-              <strong className="font-medium">solo falta que lo envíes</strong>. El pedido queda pendiente hasta que te lo
-              confirmemos.
-            </p>
+          <div
+            ref={readyRef}
+            tabIndex={-1}
+            className="grain flex animate-in flex-col gap-5 rounded-[1.75rem] bg-sage-soft p-6 outline-none duration-500 fade-in slide-in-from-bottom-2 sm:p-8"
+          >
+            <div className="flex items-start gap-4">
+              <span className="grid size-11 shrink-0 place-items-center rounded-full bg-sage text-cream">
+                <CircleCheck className="size-5" strokeWidth={1.75} />
+              </span>
+              <div className="flex flex-col gap-2">
+                <h2 className="text-[1.75rem] leading-tight">Tu pedido está listo para enviar</h2>
+                <p className="text-sm leading-relaxed text-ink/80">
+                  Verificamos precios y disponibilidad. Al tocar el botón se abre WhatsApp con el resumen escrito:{' '}
+                  <strong className="font-medium">solo falta que lo envíes</strong>. El pedido queda pendiente hasta que te
+                  lo confirmemos.
+                </p>
+              </div>
+            </div>
             <div className="flex flex-col gap-3 sm:flex-row">
-              <a
-                href={orderLink}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="btn min-h-12 bg-[#1f7a4d] text-white hover:bg-[#186440]"
-                onClick={() => setOpened(true)}
-              >
-                Enviar pedido por WhatsApp
-              </a>
-              <button type="button" className="btn btn-outline min-h-12" onClick={() => setOrderLink(null)}>
+              <Button asChild variant="whatsapp" size="lg">
+                <a href={orderLink} target="_blank" rel="noopener noreferrer" onClick={() => setOpened(true)}>
+                  <SocialIconWhatsApp className="size-5" />
+                  Enviar pedido por WhatsApp
+                </a>
+              </Button>
+              <Button type="button" variant="outline" size="lg" onClick={() => setOrderLink(null)}>
+                <PencilLine />
                 Editar datos
-              </button>
+              </Button>
             </div>
             {opened && (
-              <div className="flex flex-col gap-3 border-t border-sage/30 pt-4">
+              <div className="flex flex-col gap-3 border-t border-sage/25 pt-5 sm:flex-row sm:items-center sm:justify-between">
                 <p className="text-sm text-ink/80">¿Ya enviaste el mensaje? Vacía el carrito para empezar de nuevo.</p>
-                <button
+                <Button
                   type="button"
-                  className="btn btn-outline self-start"
+                  variant="dark"
+                  className="self-start"
                   onClick={() => {
                     setSent(true)
                     clearCart()
                   }}
                 >
                   Sí, ya lo envié
-                </button>
+                </Button>
               </div>
             )}
           </div>
         )}
       </form>
 
-      <div className="lg:sticky lg:top-24 lg:self-start">
+      <div className="lg:sticky lg:top-28 lg:self-start">
         <OrderSummary items={items} delivery={customer.delivery} showItems />
       </div>
     </div>

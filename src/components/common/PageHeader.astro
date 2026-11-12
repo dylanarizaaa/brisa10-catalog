@@ -1,0 +1,39 @@
+---
+import Sparkle from '@/components/common/Sparkle.astro'
+
+interface Crumb {
+  label: string
+  href?: string
+}
+interface Props {
+  title: string
+  description?: string
+  crumbs: Crumb[]
+}
+const { title, description, crumbs } = Astro.props
+---
+
+<!-- Cabecera de página: ruta de navegación, título y una línea de contexto. -->
+<div class="grain relative overflow-hidden border-b border-linen/70 bg-sand/60">
+  <div class="arch pointer-events-none absolute -right-10 -bottom-28 hidden h-72 w-56 border border-clay/25 md:block" aria-hidden="true"></div>
+  <div class="arch pointer-events-none absolute right-24 -bottom-36 hidden h-72 w-56 bg-clay-soft/60 md:block" aria-hidden="true"></div>
+  <Sparkle class="absolute top-10 right-[22%] hidden size-6 text-clay md:block" />
+  <div class="container-page relative py-10 sm:py-14">
+    <nav aria-label="Ruta de navegación" class="mb-5 text-sm text-stone">
+      <ol class="flex flex-wrap items-center gap-2">
+        {crumbs.map((crumb, index) => (
+          <>
+            {index > 0 && <li aria-hidden="true" class="text-linen">/</li>}
+            {crumb.href ? (
+              <li><a href={crumb.href} class="link-draw hover:text-ink">{crumb.label}</a></li>
+            ) : (
+              <li aria-current="page" class="text-ink">{crumb.label}</li>
+            )}
+          </>
+        ))}
+      </ol>
+    </nav>
+    <h1 class="text-[2.5rem] leading-[1.05] sm:text-6xl">{title}</h1>
+    {description && <p class="mt-4 max-w-xl text-lg leading-relaxed text-stone">{description}</p>}
+  </div>
+</div>

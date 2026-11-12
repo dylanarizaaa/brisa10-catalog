@@ -11,8 +11,8 @@ const path = Astro.url.pathname
 const isCurrent = (href: string) => (href === '/' ? path === '/' : !href.includes('#') && path.startsWith(href))
 ---
 
-<header class="sticky top-0 z-40 border-b border-linen/70 bg-cream/90 backdrop-blur-md">
-  <div class="container-page flex h-16 items-center justify-between gap-4">
+<header class="sticky top-0 z-40 border-b border-linen/70 bg-cream/85 backdrop-blur-lg">
+  <div class="container-page flex h-16 items-center justify-between gap-4 lg:h-[4.5rem]">
     <div class="flex items-center gap-2">
       <button
         type="button"
@@ -128,8 +128,15 @@ const isCurrent = (href: string) => (href === '/' ? path === '/' : !href.include
   function renderCartCount() {
     if (!link || !badge) return
     const count = cartCount()
+    const text = count > 99 ? '99+' : String(count)
+    // Pequeño rebote cuando cambia la cantidad (no al cargar la página).
+    if (badge.textContent && badge.textContent !== text && count > 0) {
+      badge.classList.remove('animate-pop')
+      void badge.offsetWidth
+      badge.classList.add('animate-pop')
+    }
     badge.hidden = count === 0
-    badge.textContent = count > 99 ? '99+' : String(count)
+    badge.textContent = text
     link.setAttribute('aria-label', count === 0 ? 'Ver carrito' : `Ver carrito (${count} ${count === 1 ? 'producto' : 'productos'})`)
   }
   renderCartCount()
