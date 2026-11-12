@@ -1,13 +1,11 @@
 import { useEffect, useRef, useState } from 'react'
-import { addToCart, MAX_QUANTITY, type CartItem } from '@/lib/cart'
+import { addToCart, type CartItem } from '@/lib/cart'
+import { QuantityStepper } from './QuantityStepper'
 
 interface Props {
   product: Omit<CartItem, 'quantity'>
   soldOut: boolean
 }
-
-const stepButton =
-  'grid size-12 place-items-center rounded-full text-xl transition-colors hover:bg-sand disabled:pointer-events-none disabled:opacity-35'
 
 /** Selector de cantidad y botón "Agregar al carrito" de la página de producto. */
 export function AddToCart({ product, soldOut }: Props) {
@@ -42,29 +40,7 @@ export function AddToCart({ product, soldOut }: Props) {
   return (
     <div className="flex flex-col gap-3">
       <div className="flex flex-wrap gap-3">
-        <div className="flex items-center rounded-full border border-linen" role="group" aria-label="Cantidad">
-          <button
-            type="button"
-            className={stepButton}
-            onClick={() => setQuantity((value) => value - 1)}
-            disabled={quantity <= 1}
-            aria-label="Quitar una unidad"
-          >
-            −
-          </button>
-          <output className="w-8 text-center font-medium tabular-nums" aria-live="polite">
-            {quantity}
-          </output>
-          <button
-            type="button"
-            className={stepButton}
-            onClick={() => setQuantity((value) => value + 1)}
-            disabled={quantity >= MAX_QUANTITY}
-            aria-label="Agregar una unidad"
-          >
-            +
-          </button>
-        </div>
+        <QuantityStepper value={quantity} onChange={setQuantity} />
         <button type="button" className="btn btn-primary min-h-12 flex-1" onClick={handleAdd}>
           Agregar al carrito
         </button>

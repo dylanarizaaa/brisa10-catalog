@@ -25,5 +25,7 @@ export default defineConfig({
     '/': catalogCache,
     '/catalogo': catalogCache,
     '/productos/[slug]': catalogCache,
+    '/carrito': catalogCache,
+    '/pedido': catalogCache,
   },
 })

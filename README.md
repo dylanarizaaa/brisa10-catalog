@@ -12,11 +12,18 @@ Comparte el proyecto de Supabase con la app administrativa ([brisa10-admin](http
 | 2 | Identidad visual, layout, navegación y página de inicio | ✅ |
 | 3 | Catálogo (`/catalogo`): búsqueda, filtro por categoría, orden y paginación | ✅ |
 | 4 | Detalle de producto (`/productos/[slug]`): galería, cantidad, agregar al carrito, consulta por WhatsApp y relacionados | ✅ |
-| 5 | Carrito (`/carrito`) | ⏳ Siguiente |
-| 6 | Resumen del pedido y envío por WhatsApp | ⏳ |
-| 7 | SEO, rendimiento, despliegue en Cloudflare | ⏳ |
+| 5 | Carrito (`/carrito`): cantidades, subtotales, total y verificación de disponibilidad | ✅ |
+| 6 | Resumen del pedido (`/pedido`) y envío por WhatsApp | ✅ |
+| 7 | SEO, rendimiento, despliegue en Cloudflare | ⏳ Siguiente |
 
-Los productos ya se pueden agregar al carrito (se guarda en el navegador y el encabezado muestra el contador), pero la página `/carrito` llega en la fase 5 y por ahora muestra la página 404.
+## Cómo funciona un pedido
+
+1. El cliente agrega productos al carrito (se guarda en su navegador).
+2. En `/carrito` y `/pedido` el sitio consulta `check_public_cart`: toma el **precio vigente de la base de datos** (no el guardado en el navegador) y comprueba que haya existencias para cada cantidad. Si un producto se agotó, se despublicó o cambió de precio, se avisa y hay que ajustar antes de seguir.
+3. El cliente escribe su nombre, teléfono y elige recoger en tienda o envío a domicilio en Bogotá (dirección y barrio).
+4. Tras una última verificación, se abre WhatsApp con el resumen escrito hacia el número del negocio. El cliente lo envía.
+
+El pedido es una **solicitud pendiente de confirmación**: no se guarda en la base de datos, no reserva ni descuenta inventario y no hay pago en línea. El inventario se descuenta cuando el negocio registra la venta en la app administrativa. El costo de envío se muestra como "por confirmar".
 
 ## Requisitos
 
@@ -69,10 +76,12 @@ src/
 │  ├─ home/             Secciones de la página de inicio
 │  ├─ products/         Tarjeta, grilla, filtros, paginación, galería y disponibilidad
 │  ├─ cart/             Islas React del carrito
+│  ├─ checkout/         Formulario del pedido
 │  └─ common/           Piezas reutilizables
 ├─ config/site.ts       Nombre, redes, textos de envío, navegación
 ├─ layouts/             MainLayout (metadatos, header, footer)
-├─ lib/                 Formato de moneda, WhatsApp, filtros del catálogo, carrito
+├─ hooks/               Carrito y su verificación (React)
+├─ lib/                 Formato de moneda, mensaje de WhatsApp, filtros, carrito, validación
 ├─ pages/               Rutas
 ├─ services/supabase/   Único lugar que consulta Supabase
 ├─ styles/global.css    Sistema de diseño (tokens de Tailwind)

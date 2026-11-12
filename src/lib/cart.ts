@@ -81,6 +81,28 @@ export function removeFromCart(id: string): void {
   save(getCart().filter((item) => item.id !== id))
 }
 
+/** Actualiza los datos guardados (nombre, precio, foto) con los vigentes en la base de datos. */
+export function refreshCartItems(fresh: Omit<CartItem, 'quantity'>[]): void {
+  const byId = new Map(fresh.map((item) => [item.id, item]))
+  const items = getCart()
+  let changed = false
+  const next = items.map((item) => {
+    const current = byId.get(item.id)
+    if (!current) return item
+    if (
+      current.name === item.name &&
+      current.price === item.price &&
+      current.slug === item.slug &&
+      current.image === item.image
+    ) {
+      return item
+    }
+    changed = true
+    return { ...item, ...current }
+  })
+  if (changed) save(next)
+}
+
 export function clearCart(): void {
   save([])
 }

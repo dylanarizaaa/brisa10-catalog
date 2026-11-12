@@ -17,11 +17,13 @@ interface Props {
   ogType?: 'website' | 'product'
   /** Páginas que no deben indexarse (búsquedas, páginas de error). */
   noindex?: boolean
+  /** Oculta el botón flotante de WhatsApp (carrito y pedido: taparía los totales). */
+  hideWhatsAppFab?: boolean
 }
 
 const business = await getBusiness()
 const name = business.business_name
-const { title, description = site.description, image, canonicalPath, ogType = 'website', noindex = false } = Astro.props
+const { title, description = site.description, image, canonicalPath, ogType = 'website', noindex = false, hideWhatsAppFab = false } = Astro.props
 const fullTitle = title ? `${title} · ${name}` : `${name} · ${site.tagline}`
 const canonical = new URL(canonicalPath ?? Astro.url.pathname, Astro.site)
 ---
@@ -56,6 +58,6 @@ const canonical = new URL(canonicalPath ?? Astro.url.pathname, Astro.site)
       <slot />
     </main>
     <Footer business={business} />
-    <WhatsAppFab businessName={name} />
+    {!hideWhatsAppFab && <WhatsAppFab businessName={name} />}
   </body>
 </html>
