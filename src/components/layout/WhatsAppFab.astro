@@ -9,6 +9,7 @@ const href = whatsappLink(`Hola ${Astro.props.businessName}, vi su tienda virtua
 ---
 
 {href && (
+  <aside aria-label="Contacto rápido">
   <a
     href={href}
     target="_blank"
@@ -18,4 +19,5 @@ const href = whatsappLink(`Hola ${Astro.props.businessName}, vi su tienda virtua
   >
     <SocialIcon name="whatsapp" class="size-7" />
   </a>
+  </aside>
 )}

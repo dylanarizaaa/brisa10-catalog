@@ -62,6 +62,21 @@ const jsonLd = {
           : 'https://schema.org/InStock',
   },
 }
+const breadcrumbLd = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { name: 'Inicio', path: '/' },
+    { name: 'Catálogo', path: '/catalogo' },
+    { name: product.category_name, path: catalogUrl({ categoria: product.category_slug }) },
+    { name: product.name, path: `/productos/${product.slug}` },
+  ].map((item, index) => ({
+    '@type': 'ListItem',
+    position: index + 1,
+    name: item.name,
+    item: new URL(item.path, Astro.site).href,
+  })),
+}
 ---
 
 <MainLayout title={product.name} description={description} image={mainImage} ogType="product">
@@ -69,6 +84,7 @@ const jsonLd = {
     <meta property="product:price:amount" content={String(product.price)} />
     <meta property="product:price:currency" content="COP" />
     <script type="application/ld+json" set:html={JSON.stringify(jsonLd).replace(/</g, '\\u003c')} />
+    <script type="application/ld+json" set:html={JSON.stringify(breadcrumbLd).replace(/</g, '\\u003c')} />
   </Fragment>
 
   <div class="container-page pt-6 sm:pt-10">

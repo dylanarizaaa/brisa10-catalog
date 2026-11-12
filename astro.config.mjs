@@ -19,6 +19,8 @@ export default defineConfig({
   // Las fotos se sirven tal cual desde Supabase Storage; no se usa el servicio de imágenes de Cloudflare.
   adapter: cloudflare({ imageService: 'passthrough' }),
   integrations: [react()],
+  // Al tocar o pasar el cursor por un enlace se adelanta la carga de la página siguiente.
+  prefetch: { prefetchAll: true, defaultStrategy: 'hover' },
   vite: { plugins: [tailwindcss()] },
   cache: { provider: cacheCloudflare() },
   routeRules: {
@@ -27,5 +29,7 @@ export default defineConfig({
     '/productos/[slug]': catalogCache,
     '/carrito': catalogCache,
     '/pedido': catalogCache,
+    '/sitemap.xml': { maxAge: 3600, swr: 86400 },
+    '/robots.txt': { maxAge: 86400 },
   },
 })

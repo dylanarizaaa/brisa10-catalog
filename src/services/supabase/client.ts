@@ -11,6 +11,9 @@ const anonKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY ?? ''
 
 export const isSupabaseConfigured = Boolean(url && anonKey)
 
+/** Origen del proyecto (para preconectar antes de pedir las fotos). */
+export const supabaseOrigin = url
+
 export class SupabaseError extends Error {
   /** SQLSTATE o código de PostgREST. P0001 = regla de negocio con mensaje en español. */
   code: string | null

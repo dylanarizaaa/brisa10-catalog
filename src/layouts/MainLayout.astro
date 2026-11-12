@@ -1,10 +1,13 @@
 ---
 import '@/styles/global.css'
+import dmSans from '@fontsource-variable/dm-sans/files/dm-sans-latin-wght-normal.woff2?url'
+import fraunces from '@fontsource-variable/fraunces/files/fraunces-latin-wght-normal.woff2?url'
 import Footer from '@/components/layout/Footer.astro'
 import Header from '@/components/layout/Header.astro'
 import WhatsAppFab from '@/components/layout/WhatsAppFab.astro'
 import { site } from '@/config/site'
 import { getBusiness } from '@/services/supabase/business'
+import { supabaseOrigin } from '@/services/supabase/client'
 
 interface Props {
   /** Título de la página; se le agrega el nombre del negocio. Sin él se usa nombre + lema. */
@@ -26,6 +29,8 @@ const name = business.business_name
 const { title, description = site.description, image, canonicalPath, ogType = 'website', noindex = false, hideWhatsAppFab = false } = Astro.props
 const fullTitle = title ? `${title} · ${name}` : `${name} · ${site.tagline}`
 const canonical = new URL(canonicalPath ?? Astro.url.pathname, Astro.site)
+// Sin imagen propia (inicio, catálogo) se comparte la imagen general del sitio.
+const ogImage = image ?? new URL('/og-default.png', Astro.site).href
 ---
 
 <!doctype html>
@@ -45,8 +50,15 @@ const canonical = new URL(canonicalPath ?? Astro.url.pathname, Astro.site)
     <meta property="og:title" content={fullTitle} />
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical} />
-    {image && <meta property="og:image" content={image} />}
-    <meta name="twitter:card" content={image ? 'summary_large_image' : 'summary'} />
+    <meta property="og:image" content={ogImage} />
+    {!image && <meta property="og:image:width" content="1200" />}
+    {!image && <meta property="og:image:height" content="630" />}
+    <meta property="og:image:alt" content={title ?? name} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <!-- Las dos fuentes del primer pantallazo se piden de inmediato; las fotos vienen de Supabase. -->
+    <link rel="preload" as="font" type="font/woff2" href={fraunces} crossorigin />
+    <link rel="preload" as="font" type="font/woff2" href={dmSans} crossorigin />
+    {supabaseOrigin && <link rel="preconnect" href={supabaseOrigin} />}
     <slot name="head" />
   </head>
   <body class="flex min-h-dvh flex-col">

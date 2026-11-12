@@ -14,7 +14,7 @@ Comparte el proyecto de Supabase con la app administrativa ([brisa10-admin](http
 | 4 | Detalle de producto (`/productos/[slug]`): galería, cantidad, agregar al carrito, consulta por WhatsApp y relacionados | ✅ |
 | 5 | Carrito (`/carrito`): cantidades, subtotales, total y verificación de disponibilidad | ✅ |
 | 6 | Resumen del pedido (`/pedido`) y envío por WhatsApp | ✅ |
-| 7 | SEO, rendimiento, despliegue en Cloudflare | ⏳ Siguiente |
+| 7 | SEO, rendimiento, accesibilidad y guía de despliegue | ✅ |
 
 ## Cómo funciona un pedido
 
@@ -53,6 +53,57 @@ Nunca usar la clave `service_role`: todo lo que empieza por `PUBLIC_` llega al n
 | `npm run build` | Verificación de tipos y build de producción en `dist/` |
 | `npm run lint` | Verificación de tipos y diagnósticos (`astro check`) |
 | `npm run preview` | Sirve el build de producción |
+| `npm run deploy` | Construye y publica en Cloudflare (requiere `wrangler login`) |
+
+## Despliegue en Cloudflare
+
+El sitio corre como un **Worker de Cloudflare** (plan gratuito: 100.000 peticiones al día). La configuración está en `wrangler.jsonc`; el adaptador de Astro la completa al construir.
+
+> Estos pasos se verificaron hasta donde es posible sin una cuenta: el build y `wrangler deploy --dry-run` funcionan. Los nombres exactos de los menús del panel de Cloudflare pueden variar.
+
+### Opción A — Despliegue automático desde GitHub (recomendada)
+
+1. Crea una cuenta en [dash.cloudflare.com](https://dash.cloudflare.com).
+2. **Workers & Pages → Create → Import a repository**, conecta GitHub y elige `brisa10-catalog`.
+3. Configura el build:
+   - **Build command:** `npm run build`
+   - **Deploy command:** `npx wrangler deploy`
+4. En las **variables de build** agrega las cuatro del archivo `.env.example` con sus valores reales (`PUBLIC_SUPABASE_URL`, `PUBLIC_SUPABASE_ANON_KEY`, `PUBLIC_WHATSAPP_NUMBER`, `PUBLIC_SITE_URL`). Deben estar disponibles **durante el build**, porque quedan escritas en el sitio al construirlo.
+5. Guarda y despliega. Cada `push` a `main` vuelve a publicar.
+
+### Opción B — Desde tu equipo
+
+```bash
+npx wrangler login
+npm run deploy        # usa las variables de tu archivo .env
+```
+
+### Después del primer despliegue
+
+- El sitio queda en `https://brisa10-catalog.<tu-subdominio>.workers.dev`. Para usar un dominio propio: en el Worker, **Settings → Domains & Routes → Add → Custom domain**.
+- Pon la dirección definitiva en `PUBLIC_SITE_URL` y vuelve a desplegar: de ella dependen los enlaces canónicos, el sitemap y las vistas previas al compartir.
+- **Cambiar una variable exige volver a desplegar** (por ejemplo, un nuevo número de WhatsApp).
+- El primer despliegue crea un espacio KV llamado `SESSION`. Lo exige el adaptador de Astro; el sitio no guarda nada en él y entra en el plan gratuito.
+- En Google Search Console puedes registrar `https://tu-dominio/sitemap.xml`.
+
+### Comprobaciones tras publicar
+
+1. Abrir el inicio, el catálogo y un producto desde el celular.
+2. Armar un pedido de prueba y confirmar que WhatsApp abre con el número correcto.
+3. Compartir el enlace de un producto por WhatsApp y ver que aparece su foto y su nombre.
+4. Despublicar un producto en la app administrativa y confirmar que desaparece (puede tardar unos minutos por la caché).
+
+## SEO, rendimiento y accesibilidad
+
+- **Metadatos por página:** título, descripción, enlace canónico y Open Graph. Cada producto comparte su foto principal; el resto del sitio usa `public/og-default.png`.
+- **Datos estructurados (Schema.org):** `Store` en el inicio; `Product` (precio en COP y disponibilidad) y `BreadcrumbList` en cada producto.
+- **`/sitemap.xml`** se genera con las categorías y los productos publicados (se renueva cada hora). **`/robots.txt`** lo anuncia.
+- Búsquedas, carrito, pedido y páginas de error llevan `noindex`.
+- **Rendimiento:** HTML renderizado en el servidor y guardado en la caché de Cloudflare; JavaScript solo en las islas (carrito, pedido, botón de agregar); fuentes incluidas en el sitio y precargadas; fotos con carga diferida y dimensiones reservadas (sin saltos de diseño); precarga de la página siguiente al tocar un enlace.
+- **Accesibilidad:** contraste AA, foco visible, navegación por teclado, etiquetas para lectores de pantalla y respeto de "reducir movimiento". Revisado con axe-core en todas las páginas.
+- **Cabeceras de seguridad** en `src/middleware.ts`.
+
+**Peso de las fotos:** el sitio muestra las fotos tal como se subieron en la app administrativa (hasta 5 MB cada una). Es el factor que más afecta la velocidad en celulares. Conviene subirlas ya reducidas (lado mayor de ~1.600 px, JPG o WebP de menos de 300 kB).
 
 ## Arquitectura
 
@@ -82,7 +133,8 @@ src/
 ├─ layouts/             MainLayout (metadatos, header, footer)
 ├─ hooks/               Carrito y su verificación (React)
 ├─ lib/                 Formato de moneda, mensaje de WhatsApp, filtros, carrito, validación
-├─ pages/               Rutas
+├─ middleware.ts        Cabeceras de seguridad
+├─ pages/               Rutas, sitemap.xml y robots.txt
 ├─ services/supabase/   Único lugar que consulta Supabase
 ├─ styles/global.css    Sistema de diseño (tokens de Tailwind)
 └─ types/
@@ -98,7 +150,7 @@ Definido en `src/styles/global.css`.
 | `sand` / `linen` | `#efe6da` / `#e2d6c6` | Superficies, marcos de foto, bordes |
 | `ink` / `stone` | `#2b2622` / `#6b625a` | Texto principal y secundario |
 | `clay` | `#9c4f36` | Acento: botones y enlaces |
-| `sage` | `#5f6e57` | Secundario |
+| `sage` | `#4f5d48` | Secundario |
 
 Tipografía: **Fraunces** (títulos) y **DM Sans** (texto), incluidas en el proyecto. Fotos de producto en proporción 4:5. Los colores de texto cumplen contraste AA.
 
@@ -108,6 +160,7 @@ Tipografía: **Fraunces** (títulos) y **DM Sans** (texto), incluidas en el proy
 |-----|-------|
 | Enlaces de Instagram, TikTok y Facebook | `src/config/site.ts` → `social` |
 | Logotipo (hoy es el nombre en texto) | `src/components/layout/Logo.astro` y `public/favicon.svg` |
+| Imagen al compartir el sitio en redes (1200 × 630 px) | `public/og-default.png` |
 | Foto del banner principal (hoy es una ilustración) | `src/assets/hero.svg` y `src/components/home/Hero.astro` |
 | Texto de presentación del negocio | `src/components/home/About.astro` |
 | Nombre, dirección, teléfono y correo | App administrativa → Configuración → Negocio |

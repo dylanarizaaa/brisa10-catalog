@@ -1,0 +1,7 @@
+{
+  // Configuración del Worker de Cloudflare. El adaptador de Astro la completa al construir
+  // (punto de entrada, archivos estáticos, caché y el espacio KV que usa internamente).
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "brisa10-catalog",
+  "compatibility_date": "2026-11-01"
+}

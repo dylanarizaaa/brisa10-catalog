@@ -59,7 +59,7 @@ const isCurrent = (href: string) => (href === '/' ? path === '/' : !href.include
 </header>
 
 <!-- Menú móvil: API popover nativa, sin JavaScript. -->
-<div id="mobile-menu" popover class="mobile-menu m-0 h-dvh max-h-none w-[min(20rem,85vw)] max-w-none flex-col bg-cream p-0 text-ink shadow-2xl md:hidden">
+<div id="mobile-menu" popover role="dialog" aria-label="Menú" class="mobile-menu m-0 h-dvh max-h-none w-[min(20rem,85vw)] max-w-none flex-col bg-cream p-0 text-ink shadow-2xl md:hidden">
   <div class="flex h-16 items-center justify-between border-b border-linen px-5">
     <Logo name={businessName} />
     <button

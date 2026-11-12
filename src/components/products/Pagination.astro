@@ -9,7 +9,6 @@ interface Props {
 const { params, pageCount } = Astro.props
 const page = params.pagina
 const link = 'btn btn-outline'
-const off = 'btn pointer-events-none border border-linen text-stone/60'
 ---
 
 {pageCount > 1 && (
@@ -20,10 +19,7 @@ const off = 'btn pointer-events-none border border-linen text-stone/60'
         Anterior
       </a>
     ) : (
-      <span class={off} aria-hidden="true">
-        <ChevronLeft class="size-4" />
-        Anterior
-      </span>
+      <span />
     )}
     <p class="text-sm text-stone">
       Página <span class="font-medium text-ink">{page}</span> de {pageCount}
@@ -34,10 +30,7 @@ const off = 'btn pointer-events-none border border-linen text-stone/60'
         <ChevronRight class="size-4" />
       </a>
     ) : (
-      <span class={off} aria-hidden="true">
-        Siguiente
-        <ChevronRight class="size-4" />
-      </span>
+      <span />
     )}
   </nav>
 )}

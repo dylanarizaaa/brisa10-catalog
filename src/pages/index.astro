@@ -5,6 +5,7 @@ import CategoryGrid from '@/components/home/CategoryGrid.astro'
 import Hero from '@/components/home/Hero.astro'
 import ProductSection from '@/components/home/ProductSection.astro'
 import ShippingInfo from '@/components/home/ShippingInfo.astro'
+import { site } from '@/config/site'
 import MainLayout from '@/layouts/MainLayout.astro'
 import { getBusiness } from '@/services/supabase/business'
 import { getCategories } from '@/services/supabase/categories'
@@ -28,9 +29,30 @@ const [business, categories, featured, recent] = await Promise.all([
   orEmpty('destacados', getCatalog({ featured: true, limit: 4 }).then((page) => page.items)),
   orEmpty('recientes', getCatalog({ sort: 'recientes', limit: 8 }).then((page) => page.items)),
 ])
+
+// Datos estructurados del negocio para buscadores.
+const sameAs = Object.values(site.social).filter((url) => url && new URL(url).pathname.length > 1)
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Store',
+  name: business.business_name,
+  description: site.description,
+  url: new URL('/', Astro.site).href,
+  image: new URL('/og-default.png', Astro.site).href,
+  ...(business.phone && { telephone: business.phone }),
+  ...(business.email && { email: business.email }),
+  address: {
+    '@type': 'PostalAddress',
+    ...(business.address && { streetAddress: business.address }),
+    addressLocality: site.city,
+    addressCountry: 'CO',
+  },
+  ...(sameAs.length > 0 && { sameAs }),
+}
 ---
 
 <MainLayout>
+  <script slot="head" type="application/ld+json" set:html={JSON.stringify(jsonLd).replace(/</g, '\\u003c')} />
   <Hero />
   {categories.length > 0 && <CategoryGrid categories={categories} />}
   {featured.length > 0 && (
