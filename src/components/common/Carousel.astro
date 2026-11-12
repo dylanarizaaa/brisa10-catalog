@@ -1,0 +1,65 @@
+---
+import { ArrowLeft, ArrowRight } from '@lucide/astro'
+
+interface Props {
+  /** Nombre del carrusel para lectores de pantalla. */
+  label: string
+}
+const { label } = Astro.props
+const control =
+  'grid size-11 place-items-center rounded-full border border-ink/20 text-ink transition-[background-color,border-color,color,opacity] duration-300 hover:border-ink hover:bg-ink hover:text-white disabled:pointer-events-none disabled:opacity-30'
+---
+
+<!--
+  Carril horizontal con desplazamiento nativo (dedo, trackpad o teclado) y ajuste a cada
+  elemento. Los <li> los pone quien lo usa, con su propio ancho. Botones y barra de
+  progreso son una mejora: sin JavaScript el carril se sigue desplazando.
+-->
+<div class="carousel" data-carousel>
+  <ul
+    class="scroll-rail -mx-5 flex snap-x snap-mandatory scroll-px-5 gap-4 overflow-x-auto px-5 pb-1 sm:-mx-8 sm:scroll-px-8 sm:gap-6 sm:px-8 xl:mx-0 xl:scroll-px-0 xl:px-0"
+    data-carousel-track
+    tabindex="0"
+    aria-label={label}
+  >
+    <slot />
+  </ul>
+  <div class="mt-8 flex items-center gap-6" data-carousel-controls hidden>
+    <div class="relative h-px flex-1 overflow-hidden bg-linen" aria-hidden="true">
+      <span class="absolute inset-y-0 left-0 w-1/4 bg-ink transition-[width,transform] duration-300 ease-[var(--ease-soft)]" data-carousel-progress></span>
+    </div>
+    <div class="flex gap-2">
+      <button type="button" class={control} data-carousel-prev aria-label="Anterior"><ArrowLeft class="size-4" stroke-width={1.5} /></button>
+      <button type="button" class={control} data-carousel-next aria-label="Siguiente"><ArrowRight class="size-4" stroke-width={1.5} /></button>
+    </div>
+  </div>
+</div>
+
+<script>
+  for (const carousel of document.querySelectorAll<HTMLElement>('[data-carousel]')) {
+    const track = carousel.querySelector<HTMLElement>('[data-carousel-track]')
+    const controls = carousel.querySelector<HTMLElement>('[data-carousel-controls]')
+    const progress = carousel.querySelector<HTMLElement>('[data-carousel-progress]')
+    const prev = carousel.querySelector<HTMLButtonElement>('[data-carousel-prev]')
+    const next = carousel.querySelector<HTMLButtonElement>('[data-carousel-next]')
+    if (!track || !controls || !progress || !prev || !next) continue
+
+    const smooth = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth'
+    const update = () => {
+      const max = track.scrollWidth - track.clientWidth
+      // Sin desbordamiento no hacen falta controles.
+      controls.hidden = max <= 4
+      const visible = track.clientWidth / track.scrollWidth
+      progress.style.width = `${Math.max(visible * 100, 12)}%`
+      progress.style.transform = `translateX(${max > 0 ? (track.scrollLeft / max) * ((1 - visible) / visible) * 100 : 0}%)`
+      prev.disabled = track.scrollLeft <= 4
+      next.disabled = track.scrollLeft >= max - 4
+    }
+    const step = () => track.clientWidth * 0.85
+    prev.addEventListener('click', () => track.scrollBy({ left: -step(), behavior: smooth }))
+    next.addEventListener('click', () => track.scrollBy({ left: step(), behavior: smooth }))
+    track.addEventListener('scroll', update, { passive: true })
+    new ResizeObserver(update).observe(track)
+    update()
+  }
+</script>

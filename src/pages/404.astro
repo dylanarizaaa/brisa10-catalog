@@ -4,16 +4,13 @@ import MainLayout from '@/layouts/MainLayout.astro'
 ---
 
 <MainLayout title="Página no encontrada" description="La página que buscas no existe o ya no está disponible." noindex>
-  <section class="grain relative overflow-hidden">
-    <div class="container-page flex flex-col items-center gap-6 py-20 text-center sm:py-28">
-      <p class="arch grid h-44 w-36 place-items-center bg-clay-soft font-display text-6xl text-clay italic" aria-hidden="true">404</p>
-      <p class="eyebrow eyebrow-plain">Error 404</p>
-      <h1 class="text-4xl sm:text-6xl">No encontramos esta página</h1>
-      <p class="max-w-md text-lg leading-relaxed text-stone">Puede que el producto ya no esté disponible o que el enlace haya cambiado.</p>
-      <div class="mt-2 flex flex-wrap justify-center gap-3">
-        <a href="/catalogo" class={buttonVariants({ size: 'lg' })}>Ver el catálogo</a>
-        <a href="/" class={buttonVariants({ variant: 'outline', size: 'lg' })}>Ir al inicio</a>
-      </div>
+  <section class="container-page flex flex-col items-center gap-6 py-24 text-center sm:py-36">
+    <div class="font-display text-[7rem] leading-none text-ink/15 italic before:content-['404'] sm:text-[10rem]" aria-hidden="true"></div>
+    <h1 class="animate-rise text-[2.75rem] leading-[1] sm:text-[4rem]">No encontramos esta página</h1>
+    <p class="max-w-md animate-rise text-lg leading-relaxed text-stone [animation-delay:100ms]">Puede que el producto ya no esté disponible o que el enlace haya cambiado.</p>
+    <div class="mt-3 flex animate-rise flex-wrap justify-center gap-3 [animation-delay:200ms]">
+      <a href="/catalogo" class={buttonVariants({ size: 'lg' })}>Ver el catálogo</a>
+      <a href="/" class={buttonVariants({ variant: 'outline', size: 'lg' })}>Ir al inicio</a>
     </div>
   </section>
 </MainLayout>

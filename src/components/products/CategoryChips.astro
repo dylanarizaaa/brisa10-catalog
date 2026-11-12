@@ -1,5 +1,6 @@
 ---
 import { catalogUrl, type CatalogParams } from '@/lib/catalogUrl'
+import { productImageUrl } from '@/services/supabase/client'
 import type { Category } from '@/types/category'
 
 interface Props {
@@ -10,24 +11,35 @@ const { params, categories } = Astro.props
 // Cambiar de categoría conserva la búsqueda y el orden, y vuelve a la primera página.
 const url = (slug: string) => catalogUrl({ q: params.q, orden: params.orden, categoria: slug })
 const chip =
-  'inline-flex h-11 shrink-0 items-center gap-2 rounded-full border px-5 text-sm font-medium whitespace-nowrap transition-colors duration-200'
-const on = 'border-ink bg-ink text-cream'
-const off = 'border-linen bg-card text-ink hover:border-ink'
+  'group flex shrink-0 flex-col items-center gap-2.5 text-center text-[0.8125rem] font-medium whitespace-nowrap'
+const ring = 'grid size-[4.5rem] place-items-center overflow-hidden rounded-full border bg-sand transition-[border-color,box-shadow] duration-300 sm:size-20'
 ---
 
+<!-- Categorías como círculos con foto: navegación visual del catálogo. -->
 {categories.length > 0 && (
-  <nav aria-label="Categorías">
-    <ul class="-mx-5 flex gap-2 overflow-x-auto px-5 pb-1 sm:mx-0 sm:flex-wrap sm:px-0">
+  <nav aria-label="Filtrar por categoría">
+    <ul class="scroll-rail -mx-5 flex gap-5 overflow-x-auto px-5 pb-1 sm:mx-0 sm:justify-center sm:gap-8 sm:px-0">
       <li>
-        <a href={url('')} aria-current={params.categoria ? undefined : 'true'} class:list={[chip, params.categoria ? off : on]}>Todo</a>
+        <a href={url('')} aria-current={params.categoria ? undefined : 'true'} class={chip}>
+          <span class:list={[ring, params.categoria ? 'border-transparent group-hover:border-ink/40' : 'border-ink ring-1 ring-ink ring-offset-2']}>
+            <span class="font-display text-[1.375rem] italic">Todo</span>
+          </span>
+          <span class:list={[params.categoria ? 'text-stone group-hover:text-ink' : 'text-ink']}>Todo</span>
+        </a>
       </li>
       {categories.map((category) => {
         const active = category.slug === params.categoria
         return (
           <li>
-            <a href={url(category.slug)} aria-current={active ? 'true' : undefined} class:list={[chip, active ? on : off]}>
-              {category.name}
-              <span class:list={['text-xs font-normal', active ? 'text-cream/70' : 'text-stone']}>{category.product_count}</span>
+            <a href={url(category.slug)} aria-current={active ? 'true' : undefined} class={chip}>
+              <span class:list={[ring, active ? 'border-ink ring-1 ring-ink ring-offset-2' : 'border-transparent group-hover:border-ink/40']}>
+                {category.image_path ? (
+                  <img src={productImageUrl(category.image_path, 200)} alt="" width="80" height="80" loading="lazy" decoding="async" class="size-full object-cover transition-transform duration-500 group-hover:scale-110" />
+                ) : (
+                  <span class="font-display text-2xl text-ink/30 italic" aria-hidden="true">{category.name.charAt(0)}</span>
+                )}
+              </span>
+              <span class:list={[active ? 'text-ink' : 'text-stone group-hover:text-ink']}>{category.name}</span>
             </a>
           </li>
         )

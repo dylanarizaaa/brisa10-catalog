@@ -1,6 +1,5 @@
 ---
 import { ArrowRight } from '@lucide/astro'
-import Sparkle from '@/components/common/Sparkle.astro'
 import { buttonVariants } from '@/components/ui/button'
 
 interface Props {
@@ -15,36 +14,32 @@ const steps = [
 ---
 
 <!-- PENDIENTE: ajustar el texto de presentación con la historia real del negocio. -->
-<section class="grain relative overflow-hidden bg-ink py-20 text-cream sm:py-28">
-  <div class="arch pointer-events-none absolute -right-24 -bottom-40 hidden h-[34rem] w-[26rem] border border-cream/10 lg:block" aria-hidden="true"></div>
-  <div class="arch pointer-events-none absolute -right-8 -bottom-52 hidden h-[34rem] w-[26rem] border border-cream/10 lg:block" aria-hidden="true"></div>
-  <Sparkle class="absolute top-12 left-[6%] hidden size-8 text-clay sm:block" />
-
-  <div class="container-page relative grid gap-14 lg:grid-cols-[1.15fr_1fr] lg:gap-20">
-    <div class="flex flex-col items-start gap-6" data-reveal>
-      <p class="eyebrow !text-clay-soft">Sobre {businessName}</p>
-      <h2 class="text-4xl leading-[1.08] sm:text-5xl lg:text-6xl">
-        Una tienda de barrio con cosas <em class="font-normal text-clay-soft">lindas</em> para tu casa y para regalar
+<section id="como-comprar" class="bg-cream py-24 sm:py-32" aria-labelledby="sobre-titulo">
+  <div class="container-page grid gap-16 lg:grid-cols-[1.1fr_1fr] lg:gap-24">
+    <div class="flex flex-col items-start gap-6">
+      <p class="eyebrow" data-reveal>Sobre {businessName}</p>
+      <h2 id="sobre-titulo" class="text-[2.75rem] leading-[1] sm:text-[4.25rem]" data-reveal style="--reveal-delay:80ms">
+        Una tienda de barrio con cosas <em>lindas</em> para tu casa y para regalar
       </h2>
-      <p class="max-w-xl text-lg leading-relaxed text-cream/75">
-        Elegimos cada pieza una por una: cerámicas, peluches, decoración y detalles que se notan. Aquí puedes ver
-        todo lo que tenemos en la tienda y pedirlo sin salir de casa.
+      <p class="max-w-lg text-[1.0625rem] leading-relaxed text-stone" data-reveal style="--reveal-delay:160ms">
+        Elegimos cada pieza una por una: cerámicas, peluches, decoración y detalles que se notan. Aquí puedes ver todo
+        lo que tenemos en la tienda y pedirlo sin salir de casa.
       </p>
-      <a href="/catalogo" class:list={[buttonVariants({ variant: 'light', size: 'lg' }), 'group mt-2']}>
+      <a href="/catalogo" class:list={[buttonVariants({ size: 'lg' }), 'group mt-2']} data-reveal style="--reveal-delay:240ms">
         Ver el catálogo
-        <ArrowRight class="size-4 transition-transform duration-200 group-hover:translate-x-1" />
+        <ArrowRight class="size-4 transition-transform duration-300 group-hover:translate-x-1" stroke-width={1.5} />
       </a>
     </div>
 
     <div class="flex flex-col justify-center">
-      <h3 class="mb-2 font-sans text-xs font-semibold tracking-[0.18em] text-cream/60 uppercase">Así de fácil es comprar</h3>
-      <ol class="flex flex-col">
+      <h3 class="eyebrow mb-4 !text-ink">Así de fácil es comprar</h3>
+      <ol class="border-t border-ink/15">
         {steps.map((step, index) => (
-          <li class="flex gap-6 border-b border-cream/15 py-6 last:border-b-0" data-reveal style={`--reveal-delay:${index * 90}ms`}>
-            <span class="font-display text-4xl text-clay-soft italic" aria-hidden="true">0{index + 1}</span>
-            <div class="flex flex-col gap-1">
-              <h4 class="font-display text-xl">{step.title}</h4>
-              <p class="text-[0.9375rem] leading-relaxed text-cream/70">{step.text}</p>
+          <li class="grid grid-cols-[3.5rem_1fr] gap-4 border-b border-ink/15 py-7" data-reveal style={`--reveal-delay:${index * 100}ms`}>
+            <span class="font-display text-[2.5rem] leading-none text-clay italic" aria-hidden="true">0{index + 1}</span>
+            <div class="flex flex-col gap-1.5">
+              <h4 class="text-[1.625rem] leading-tight">{step.title}</h4>
+              <p class="leading-relaxed text-stone">{step.text}</p>
             </div>
           </li>
         ))}

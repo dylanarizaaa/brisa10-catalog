@@ -15,6 +15,7 @@ Comparte el proyecto de Supabase con la app administrativa ([brisa10-admin](http
 | 5 | Carrito (`/carrito`): cantidades, subtotales, total y verificación de disponibilidad | ✅ |
 | 6 | Resumen del pedido (`/pedido`) y envío por WhatsApp | ✅ |
 | 7 | SEO, rendimiento, accesibilidad y guía de despliegue | ✅ |
+| — | Rediseño editorial minimalista: portada con video, secciones editoriales, carruseles, tarjetas con segunda foto | ✅ |
 
 ## Cómo funciona un pedido
 
@@ -28,7 +29,7 @@ El pedido es una **solicitud pendiente de confirmación**: no se guarda en la ba
 ## Requisitos
 
 - Node.js 22.
-- En Supabase, tener aplicada la migración `20261111000007_public_catalog.sql` de `brisa10-admin`.
+- En Supabase, tener aplicadas las migraciones `20261111000007_public_catalog.sql` y `20261111000008_catalog_editorial.sql` de `brisa10-admin`. Sin la 8 el sitio funciona igual, pero no muestra la segunda foto al pasar el cursor ni las descripciones de categoría.
 
 ## Puesta en marcha
 
@@ -44,6 +45,7 @@ npm run dev            # http://localhost:4321
 | `PUBLIC_SUPABASE_ANON_KEY` | Clave pública `anon` |
 | `PUBLIC_WHATSAPP_NUMBER` | WhatsApp del negocio, solo dígitos con indicativo (`573001234567`). Vacío oculta los botones de WhatsApp |
 | `PUBLIC_SITE_URL` | Dirección pública del sitio (enlaces canónicos y Open Graph) |
+| `PUBLIC_SUPABASE_IMAGE_TRANSFORM` | Opcional. `true` pide las fotos al tamaño de cada pantalla (requiere un plan de pago de Supabase con *Image transformations*). Vacío: fotos originales |
 
 Nunca usar la clave `service_role`: todo lo que empieza por `PUBLIC_` llega al navegador.
 
@@ -103,7 +105,18 @@ npm run deploy        # usa las variables de tu archivo .env
 - **Accesibilidad:** contraste AA, foco visible, navegación por teclado, etiquetas para lectores de pantalla y respeto de "reducir movimiento". Revisado con axe-core en todas las páginas.
 - **Cabeceras de seguridad** en `src/middleware.ts`.
 
-**Peso de las fotos:** el sitio muestra las fotos tal como se subieron en la app administrativa (hasta 5 MB cada una). Es el factor que más afecta la velocidad en celulares. Conviene subirlas ya reducidas (lado mayor de ~1.600 px, JPG o WebP de menos de 300 kB).
+**Peso de las fotos:** sin `PUBLIC_SUPABASE_IMAGE_TRANSFORM`, el sitio muestra las fotos tal como se subieron en la app administrativa (hasta 5 MB cada una). Es el factor que más afecta la velocidad en celulares. Conviene subirlas ya reducidas (lado mayor de ~1.600 px, JPG o WebP de menos de 300 kB). Con la variable activa, Supabase entrega cada foto al ancho que necesita la pantalla.
+
+## Video de presentación
+
+La portada del inicio está preparada para un video corto de la tienda o sus productos. Mientras no haya uno, muestra la foto del primer producto destacado (o la ilustración de respaldo si no hay fotos). No se incluye ningún video de muestra.
+
+1. Graba un video de 8 a 15 segundos, sin audio, con buena luz y movimientos lentos. Exporta una versión horizontal (16:9, 1920 × 1080) y, si quieres, una vertical para celulares (4:5 o 9:16, 1080 de ancho). MP4 (H.264) o WebM, idealmente de menos de 4 MB cada una.
+2. Exporta también una foto fija del primer cuadro (JPG de ~1920 px): se ve mientras carga el video y cuando la persona pidió reducir el movimiento.
+3. Guarda los archivos en `public/media/` (por ejemplo `hero.mp4`, `hero-vertical.mp4` y `hero.jpg`).
+4. En `src/config/site.ts`, completa `hero.video.desktop`, `hero.video.mobile` (opcional), `hero.image` y `hero.alt` con esas rutas (`/media/hero.mp4`…) y una descripción breve.
+
+El video se reproduce solo, en silencio y en bucle, con un botón para pausarlo. No se descarga si el dispositivo tiene activado "reducir movimiento" o el modo de ahorro de datos: en ese caso queda la foto fija y el botón permite reproducirlo.
 
 ## Arquitectura
 
@@ -112,6 +125,7 @@ Cliente ─► Cloudflare (Astro en el servidor + caché de ~1 min) ─► Supab
 ```
 
 - **Render en el servidor con caché corta** (`routeRules` en `astro.config.mjs`): el HTML llega completo, casi sin JavaScript, y un cambio hecho en la app administrativa se refleja en alrededor de un minuto sin reconstruir el sitio.
+- **Componentes nuevos del rediseño:** `Carousel.astro` (carril con desplazamiento nativo, flechas y barra de progreso), `ProductCarousel`, `Hero` (video o foto), `BrandStatement`, `CategoryShowcase`, `EditorialSplit`, `PromoBanner`. Sin dependencias nuevas de animación: todo es CSS y un `IntersectionObserver`.
 - **React solo en islas interactivas:** búsqueda y orden del catálogo, botón de agregar y acordeón del producto, carrito y pedido. El resto son componentes Astro sin JavaScript; el menú móvil usa la API `popover` del navegador. El inicio no carga React.
 - **shadcn/ui** (`src/components/ui/`) para botones, campos, selector, grupo de opciones y acordeón, con su tema apuntando a la paleta de la tienda. En archivos `.astro` los enlaces con aspecto de botón usan `buttonVariants()`.
 - **Supabase por funciones RPC** (`get_public_catalog`, `get_public_product`, `get_public_categories`, `get_public_business`, `check_public_cart`). El rol `anon` no puede leer ninguna tabla; las funciones nunca devuelven stock exacto ni costos. Se llaman con `fetch`, sin el SDK.
@@ -143,21 +157,23 @@ src/
 
 ## Sistema de diseño
 
-Definido en `src/styles/global.css`. Las variables de shadcn/ui (`--primary`, `--border`, `--ring`…) apuntan a estos mismos colores, así que sus componentes heredan la identidad de la tienda.
+Dirección: e-commerce minimalista y editorial. Fondo blanco, mucho espacio entre secciones, títulos grandes en serif, fotos protagonistas y botones sobrios. Definido en `src/styles/global.css`; las variables de shadcn/ui (`--primary`, `--border`, `--ring`…) apuntan a estos colores, así que sus componentes heredan la identidad.
 
 | Token | Valor | Uso |
 |-------|-------|-----|
-| `cream` | `#faf6f0` | Fondo |
-| `sand` / `linen` | `#efe6da` / `#e2d6c6` | Superficies, marcos de foto, bordes |
-| `ink` / `stone` | `#2b2622` / `#6b625a` | Texto principal y secundario; bandas oscuras |
-| `clay` | `#9c4f36` | Acento: botones, enlaces, cinta animada |
-| `sage` | `#4f5d48` | Secundario: entregas y confirmaciones |
+| `paper` | `#ffffff` | Fondo principal |
+| `cream` / `sand` | `#f8f5f1` / `#f1ece6` | Secciones alternas, pie de página, marcos de foto |
+| `linen` | `#e6dfd7` | Bordes y divisores finos |
+| `ink` / `stone` | `#1a1817` / `#6b645e` | Texto, botones principales; texto secundario |
+| `clay` | `#9c4f36` | Acento con moderación: punto del logo, numeración, avisos |
+| `sage` | `#4f5d48` | Disponibilidad y confirmaciones |
 
-- **Tipografía:** Fraunces (títulos, precios) y DM Sans (texto), incluidas en el proyecto.
-- **Motivo visual:** el arco (`.arch`), presente en el banner, las categorías, las cabeceras de página y los estados vacíos; destellos de cuatro puntas como detalle.
-- **Botones** (`src/components/ui/button.tsx`): forma de píldora y altura táctil. Variantes `default` (terracota), `outline`, `secondary`, `dark`, `light`, `whatsapp`, `ghost` y `link`.
-- **Fotos de producto** en proporción 4:5. En el banner del inicio se usan las fotos de los productos destacados (o los más recientes); si no hay ninguno con foto, aparece la ilustración de respaldo.
-- **Movimiento:** apariciones suaves al hacer scroll, cinta de categorías, sello giratorio y transiciones al pasar el cursor. Todo se desactiva con la preferencia "reducir movimiento" del sistema.
+- **Tipografía:** Instrument Serif (títulos editoriales y logotipo) y DM Sans (texto e interfaz), incluidas en el proyecto.
+- **Botones** (`src/components/ui/button.tsx`): rectangulares, negros por defecto, con altura táctil. Variantes `default`, `outline`, `light` y `outline-light` (sobre fotos), `secondary`, `whatsapp`, `ghost` y `link`.
+- **Encabezado:** logotipo centrado, buscador en panel superior, carrito con contador, categorías debajo (escritorio) y menú lateral con fotos (celular). Se oculta al bajar y reaparece al subir.
+- **Tarjetas de producto** (`ProductCard.astro`): foto 4:5, segunda foto al pasar el cursor, nombre, precio, disponibilidad y una acción: "Agregar al carrito" (barra que aparece al pasar el cursor; botón redondo en pantallas táctiles) o "Consultar disponibilidad" por WhatsApp si está agotado.
+- **Inicio:** portada a pantalla completa (video o foto), mensaje de marca, categorías en carrusel, destacados en carrusel, bloques editoriales por categoría (usan la descripción de la categoría escrita en la app administrativa), novedades, banner de envíos y sección "Sobre la tienda" con los pasos para comprar. Las fotos se reparten para no repetir la misma en varias secciones.
+- **Movimiento:** aparición progresiva al hacer scroll (`data-reveal`, `data-reveal="image"`), entrada escalonada de la portada, cambios suaves en tarjetas, botones, enlaces e iconos. Todo se desactiva con "reducir movimiento"; el título y la foto principal de cada página no se animan para no retrasar su carga.
 - Los colores de texto cumplen contraste AA.
 
 ## Agregar componentes de interfaz
@@ -173,7 +189,10 @@ npx shadcn@latest add <componente>
 | Enlaces de Instagram, TikTok y Facebook | `src/config/site.ts` → `social` |
 | Logotipo (hoy es el nombre en texto) | `src/components/layout/Logo.astro` y `public/favicon.svg` |
 | Imagen al compartir el sitio en redes (1200 × 630 px) | `public/og-default.png` |
-| Ilustración de respaldo del banner (solo se ve si ningún producto tiene foto) | `src/assets/hero.svg` |
+| Video y foto de la portada | `public/media/` y `src/config/site.ts` → `hero` (ver "Video de presentación") |
+| Ilustración de respaldo de la portada (solo se ve si no hay video, foto ni productos con foto) | `src/assets/hero.svg` |
+| Mensaje de marca del inicio | `src/config/site.ts` → `brand` |
+| Textos de los bloques editoriales | App administrativa → Categorías → descripción de cada categoría |
 | Texto de presentación del negocio | `src/components/home/About.astro` |
 | Nombre, dirección, teléfono y correo | App administrativa → Configuración → Negocio |
 | Costo de envío (hoy "por confirmar") | `src/config/site.ts` → `shipping` |

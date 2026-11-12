@@ -4,10 +4,10 @@ import SectionHeading from '@/components/common/SectionHeading.astro'
 import SocialIcon from '@/components/common/SocialIcon.astro'
 import AvailabilityBadge from '@/components/products/AvailabilityBadge.astro'
 import ProductGallery from '@/components/products/ProductGallery.astro'
-import ProductGrid from '@/components/products/ProductGrid.astro'
+import ProductCarousel from '@/components/products/ProductCarousel.astro'
 import { ProductInfoAccordion } from '@/components/products/ProductInfoAccordion'
 import { buttonVariants } from '@/components/ui/button'
-import Sparkle from '@/components/common/Sparkle.astro'
+import { Store, Truck, WalletCards } from '@lucide/astro'
 import { site } from '@/config/site'
 import MainLayout from '@/layouts/MainLayout.astro'
 import { catalogUrl } from '@/lib/catalogUrl'
@@ -89,8 +89,8 @@ const breadcrumbLd = {
     <script type="application/ld+json" set:html={JSON.stringify(breadcrumbLd).replace(/</g, '\\u003c')} />
   </Fragment>
 
-  <div class="container-page pt-6 sm:pt-10">
-    <nav aria-label="Ruta de navegación" class="mb-6 text-sm text-stone sm:mb-8">
+  <div class="container-page pt-6 sm:pt-8">
+    <nav aria-label="Ruta de navegación" class="mb-6 text-xs tracking-[0.08em] text-stone sm:mb-8">
       <ol class="flex flex-wrap items-center gap-2">
         <li><a href="/" class="link-draw hover:text-ink">Inicio</a></li>
         <li aria-hidden="true" class="text-linen">/</li>
@@ -102,26 +102,26 @@ const breadcrumbLd = {
       </ol>
     </nav>
 
-    <div class="grid gap-8 md:grid-cols-[1.1fr_1fr] md:gap-12 lg:gap-20">
-      <div class="min-w-0 md:sticky md:top-28 md:self-start">
+    <div class="grid gap-10 md:grid-cols-[1.15fr_1fr] md:gap-12 lg:grid-cols-[1.35fr_1fr] lg:gap-20">
+      <div class="min-w-0 md:sticky md:top-8 md:self-start">
         <ProductGallery images={product.images} productName={product.name} dimmed={soldOut} />
       </div>
 
-      <div class="flex min-w-0 flex-col gap-7">
+      <div class="flex min-w-0 flex-col md:py-4">
         <div class="flex flex-col items-start gap-4">
-          <a href={catalogUrl({ categoria: product.category_slug })} class="eyebrow hover:text-clay-deep">{product.category_name}</a>
-          <h1 class="text-4xl leading-[1.08] sm:text-5xl">{product.name}</h1>
-          <div class="flex flex-wrap items-center gap-4">
-            <p class="font-display text-3xl sm:text-4xl">{formatCurrency(product.price)}</p>
-            <AvailabilityBadge availability={product.availability} />
+          <a href={catalogUrl({ categoria: product.category_slug })} class="eyebrow link-draw hover:text-ink">{product.category_name}</a>
+          <h1 class="text-[2.75rem] leading-[1] sm:text-[3.5rem]">{product.name}</h1>
+          <div class="flex flex-wrap items-center gap-x-5 gap-y-2">
+            <p class="text-2xl font-medium tabular-nums">{formatCurrency(product.price)}</p>
+            <AvailabilityBadge availability={product.availability} class="text-sm" />
           </div>
         </div>
 
         {product.description && (
-          <p class="text-[1.0625rem] leading-relaxed whitespace-pre-line text-stone">{product.description}</p>
+          <p class="mt-7 animate-rise text-[1.0625rem] leading-relaxed whitespace-pre-line text-stone [animation-delay:160ms]">{product.description}</p>
         )}
 
-        <div class="flex flex-col gap-3 rounded-[1.75rem] border border-linen bg-card p-5 shadow-soft sm:p-6">
+        <div class="mt-8 flex animate-rise flex-col gap-3 border-t border-linen pt-8 [animation-delay:220ms]">
           <AddToCart
             client:load
             soldOut={soldOut}
@@ -139,13 +139,15 @@ const breadcrumbLd = {
               {soldOut ? 'Preguntar cuándo vuelve' : 'Consultar por WhatsApp'}
             </a>
           )}
-          <p class="flex items-center justify-center gap-2 pt-1 text-center text-xs text-stone">
-            <Sparkle class="size-2.5 text-clay" />
-            Sin pagos en línea: confirmas tu pedido por WhatsApp
-          </p>
         </div>
 
-        <div>
+        <ul class="mt-8 grid grid-cols-3 gap-3 border-y border-linen py-6 text-center text-xs text-stone">
+          <li class="flex flex-col items-center gap-2"><Truck class="size-5 text-ink" stroke-width={1.25} />Envíos en {site.city}</li>
+          <li class="flex flex-col items-center gap-2"><Store class="size-5 text-ink" stroke-width={1.25} />Recoge en tienda</li>
+          <li class="flex flex-col items-center gap-2"><WalletCards class="size-5 text-ink" stroke-width={1.25} />Pago al confirmar</li>
+        </ul>
+
+        <div class="mt-2">
           <h2 class="sr-only">Información de compra</h2>
           <ProductInfoAccordion client:visible />
         </div>
@@ -154,13 +156,14 @@ const breadcrumbLd = {
   </div>
 
   {product.related.length > 0 && (
-    <section class="container-page pt-20 sm:pt-28">
+    <section class="container-page pt-24 sm:pt-32" aria-labelledby="relacionados-titulo">
       <SectionHeading
+        id="relacionados-titulo"
         eyebrow="También te puede gustar"
         title={`Más en ${product.category_name}`}
         href={catalogUrl({ categoria: product.category_slug })}
       />
-      <ProductGrid products={product.related} />
+      <ProductCarousel products={product.related} label={`Más en ${product.category_name}`} />
     </section>
   )}
 </MainLayout>

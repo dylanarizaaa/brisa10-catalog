@@ -6,18 +6,16 @@ interface Props {
   products: Product[]
   /** Cuántas fotos iniciales se cargan sin esperar (las que se ven al abrir la página). */
   eagerCount?: number
-  /** Columnas en escritorio: 4 a página completa, 3 cuando hay filtros laterales. */
-  columns?: 3 | 4
-  /** Las tarjetas aparecen de forma escalonada al hacer scroll (secciones del inicio). */
+  /** Las tarjetas aparecen de forma escalonada al hacer scroll. */
   reveal?: boolean
 }
-const { products, eagerCount = 0, columns = 4, reveal = false } = Astro.props
+const { products, eagerCount = 0, reveal = false } = Astro.props
 ---
 
-<ul class:list={['grid grid-cols-2 gap-x-4 gap-y-9 sm:gap-x-6 sm:gap-y-12 md:grid-cols-3', columns === 4 ? 'lg:grid-cols-4' : 'xl:grid-cols-3']}>
+<ul class="grid grid-cols-2 gap-x-4 gap-y-12 sm:gap-x-6 sm:gap-y-14 md:grid-cols-3 lg:grid-cols-4">
   {products.map((product, index) => (
-    <li data-reveal={reveal ? '' : undefined} style={reveal ? `--reveal-delay:${(index % 4) * 70}ms` : undefined}>
-      <ProductCard product={product} eager={index < eagerCount} />
+    <li data-reveal={reveal ? '' : undefined} style={reveal ? `--reveal-delay:${(index % 4) * 80}ms` : undefined}>
+      <ProductCard product={product} eager={index < eagerCount} priority={eagerCount > 0 && index === 0} />
     </li>
   ))}
 </ul>

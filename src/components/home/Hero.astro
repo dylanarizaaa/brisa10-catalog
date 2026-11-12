@@ -1,128 +1,136 @@
 ---
-import { ArrowRight, ArrowUpRight, Check } from '@lucide/astro'
-// Ilustración de respaldo: se usa mientras no haya productos con foto.
-import heroImage from '@/assets/hero.svg'
-import Sparkle from '@/components/common/Sparkle.astro'
+import { ArrowRight, Pause, Play } from '@lucide/astro'
+// Ilustración de respaldo: solo se usa si no hay foto configurada ni productos con foto.
+import fallbackImage from '@/assets/hero.svg'
 import { buttonVariants } from '@/components/ui/button'
+import { site } from '@/config/site'
 import { formatCurrency } from '@/lib/formatCurrency'
-import { productImageUrl } from '@/services/supabase/client'
+import { productImageSrcset, productImageUrl } from '@/services/supabase/client'
 import type { ProductCard } from '@/types/product'
 
 interface Props {
-  /** Productos para el collage (destacados o recientes). Se usan los dos primeros con foto. */
-  products: ProductCard[]
+  /** Producto cuya foto hace de portada mientras no haya video ni foto propia. */
+  product?: ProductCard
 }
-const [main, second] = Astro.props.products.filter((product) => product.main_image_path)
-const badgeText = 'decoración ✦ regalos ✦ detalles ✦ '
+const { product } = Astro.props
+const { video, image, alt } = site.hero
+const desktopVideo = video.desktop || video.mobile
+const hasVideo = Boolean(desktopVideo)
+const videoType = (src: string) => (src.toLowerCase().endsWith('.webm') ? 'video/webm' : 'video/mp4')
+// Prioridad de la imagen: foto propia de la portada > foto de un producto > ilustración.
+const productPhoto = !image && product?.main_image_path ? product.main_image_path : null
+const poster = image || (productPhoto ? productImageUrl(productPhoto, 1800) : fallbackImage.src)
+const posterAlt = alt || (productPhoto && product ? product.name : 'Productos de decoración y regalos de la tienda')
 ---
 
-<section class="grain relative overflow-hidden">
-  <div class="pointer-events-none absolute -top-40 -right-32 size-[36rem] rounded-full bg-clay-soft/70 blur-3xl" aria-hidden="true"></div>
-  <div class="pointer-events-none absolute -bottom-48 -left-40 size-[30rem] rounded-full bg-sage-soft/80 blur-3xl" aria-hidden="true"></div>
+<section class="relative isolate overflow-hidden bg-ink text-white" aria-labelledby="hero-title">
+  <div class="relative h-[calc(100svh-6.25rem)] max-h-[54rem] min-h-[34rem] w-full lg:h-[calc(100svh-9.25rem)]">
+    <img
+      src={poster}
+      srcset={productPhoto ? productImageSrcset(productPhoto, [800, 1200, 1800, 2400]) : undefined}
+      sizes="100vw"
+      alt={hasVideo ? '' : posterAlt}
+      width="1800"
+      height="1200"
+      fetchpriority="high"
+      decoding="async"
+      class="absolute inset-0 size-full animate-hero-zoom object-cover"
+    />
 
-  <div class="container-page relative grid items-center gap-14 pt-10 pb-20 lg:grid-cols-[1.05fr_1fr] lg:gap-8 lg:pt-16 lg:pb-28">
-    <div class="flex flex-col items-start gap-7">
-      <p class="eyebrow animate-rise">Decoración y regalos · Bogotá</p>
-      <h1 class="animate-rise text-[2.75rem] leading-[1.02] [animation-delay:60ms] sm:text-6xl lg:text-[4.75rem]">
-        Pequeños detalles que hacen{' '}
-        <span class="relative inline-block whitespace-nowrap">
-          <em class="font-normal text-clay">especial</em>
-          <svg class="absolute -bottom-1 left-0 h-3 w-full text-clay/50" viewBox="0 0 200 12" fill="none" preserveAspectRatio="none" aria-hidden="true">
-            <path d="M2 8.500C40 2.500 78 2 112 5.500c30 3 58 3.500 86-1" stroke="currentColor" stroke-width="3" stroke-linecap="round" />
-          </svg>
-        </span>{' '}
-        cada espacio
-      </h1>
-      <p class="max-w-md animate-rise text-lg leading-relaxed text-stone [animation-delay:120ms]">
-        Descubre nuestra colección de decoración, regalos y artículos especiales.
-      </p>
-      <div class="flex animate-rise flex-wrap gap-3 [animation-delay:180ms]">
-        <a href="/catalogo" class:list={[buttonVariants({ size: 'lg' }), 'group']}>
-          Explorar catálogo
-          <ArrowRight class="size-4 transition-transform duration-200 group-hover:translate-x-1" />
-        </a>
-        <a href="#envios" class={buttonVariants({ variant: 'outline', size: 'lg' })}>Envíos en Bogotá</a>
-      </div>
-      <ul class="flex flex-wrap gap-x-6 gap-y-2 pt-2 text-sm text-stone">
-        {['Pedido por WhatsApp', 'Envíos en Bogotá', 'Recoge en tienda'].map((item) => (
-          <li class="flex items-center gap-2">
-            <span class="grid size-5 place-items-center rounded-full bg-sage-soft text-sage"><Check class="size-3" stroke-width={3} /></span>
-            {item}
-          </li>
-        ))}
-      </ul>
-    </div>
+    {hasVideo && (
+      <video
+        class="absolute inset-0 size-full object-cover opacity-0 transition-opacity duration-1000"
+        muted
+        loop
+        playsinline
+        preload="none"
+        poster={poster}
+        aria-label={posterAlt}
+        data-hero-video
+      >
+        {video.mobile && video.desktop && <source src={video.mobile} type={videoType(video.mobile)} media="(max-width: 767px)" />}
+        <source src={desktopVideo} type={videoType(desktopVideo)} />
+      </video>
+    )}
 
-    <!-- Collage: arco principal, tarjeta secundaria, etiqueta del producto y sello giratorio. -->
-    <div class="relative mx-auto w-full max-w-[26rem] pb-6 pl-6 sm:max-w-[30rem] lg:max-w-none lg:pl-10">
-      <div class="relative ml-auto w-[82%]">
-        <div class="arch absolute -top-4 -right-4 size-full border border-clay/40" aria-hidden="true"></div>
-        {main ? (
-          <a href={`/productos/${main.slug}`} class="arch group relative block overflow-hidden bg-sand shadow-lift" aria-label={`Ver ${main.name}`}>
-            <img
-              src={productImageUrl(main.main_image_path!)}
-              alt={main.name}
-              width="800"
-              height="1000"
-              fetchpriority="high"
-              decoding="async"
-              class="aspect-[4/5] w-full object-cover transition-transform duration-700 ease-[var(--ease-soft)] group-hover:scale-[1.04]"
-            />
+    <!-- Velo para que el texto se lea sobre cualquier foto o video. -->
+    <div class="absolute inset-0 bg-gradient-to-t from-black/65 via-black/20 to-black/10" aria-hidden="true"></div>
+
+    <div class="container-page relative flex h-full flex-col justify-end pb-12 sm:pb-16 lg:pb-20">
+      <div class="max-w-3xl">
+        <p class="eyebrow animate-rise !text-white/85">Decoración y regalos · {site.city}</p>
+        <h1 id="hero-title" class="mt-4 animate-rise text-[3.25rem] leading-[0.95] [animation-delay:120ms] sm:text-[5rem] lg:text-[6.5rem]">
+          Pequeños detalles que hacen <em>especial</em> cada espacio
+        </h1>
+        <p class="mt-6 max-w-md animate-rise text-base leading-relaxed text-white/85 [animation-delay:240ms] sm:text-lg">
+          Descubre nuestra colección de decoración, regalos y artículos especiales.
+        </p>
+        <div class="mt-9 flex animate-rise flex-wrap gap-3 [animation-delay:360ms]">
+          <a href="/catalogo" class:list={[buttonVariants({ variant: 'light', size: 'lg' }), 'group']}>
+            Explorar colección
+            <ArrowRight class="size-4 transition-transform duration-300 group-hover:translate-x-1" stroke-width={1.5} />
           </a>
-        ) : (
-          <img
-            src={heroImage.src}
-            alt="Jarrones de cerámica y un ramo decorativo sobre una repisa"
-            width="800"
-            height="1000"
-            fetchpriority="high"
-            decoding="async"
-            class="arch relative aspect-[4/5] w-full bg-sand object-cover shadow-lift"
-          />
-        )}
-      </div>
-
-      {second && (
-        <a
-          href={`/productos/${second.slug}`}
-          aria-label={`Ver ${second.name}`}
-          class="group absolute bottom-0 left-0 w-[40%] -rotate-6 overflow-hidden rounded-2xl border-[5px] border-cream bg-sand shadow-lift transition-transform duration-500 ease-[var(--ease-soft)] hover:-rotate-3"
-        >
-          <img
-            src={productImageUrl(second.main_image_path!)}
-            alt={second.name}
-            width="400"
-            height="500"
-            decoding="async"
-            class="aspect-[4/5] w-full object-cover"
-          />
-        </a>
-      )}
-
-      {main && (
-        <a
-          href={`/productos/${main.slug}`}
-          class="group absolute right-0 bottom-10 flex max-w-[62%] items-center gap-3 rounded-2xl bg-card/95 py-2.5 pr-3 pl-4 shadow-lift backdrop-blur transition-transform duration-300 hover:-translate-y-1 sm:-right-3"
-        >
-          <span class="min-w-0">
-            <span class="block truncate text-sm font-medium">{main.name}</span>
-            <span class="block font-display text-base text-clay">{formatCurrency(main.price)}</span>
-          </span>
-          <span class="grid size-9 shrink-0 place-items-center rounded-full bg-ink text-cream transition-colors group-hover:bg-clay">
-            <ArrowUpRight class="size-4" />
-          </span>
-        </a>
-      )}
-
-      <div class="absolute top-0 left-0 grid size-24 place-items-center rounded-full bg-clay text-cream shadow-lift sm:size-28 lg:left-2" aria-hidden="true">
-        <svg viewBox="0 0 100 100" class="absolute inset-0 size-full animate-spin-slow">
-          <defs><path id="hero-badge-path" d="M50 50m-37 0a37 37 0 1 1 74 0a37 37 0 1 1-74 0" /></defs>
-          <text class="fill-current text-[10.5px] font-medium tracking-[0.16em] uppercase">
-            <textPath href="#hero-badge-path">{badgeText}</textPath>
-          </text>
-        </svg>
-        <Sparkle class="size-6 sm:size-7" />
+          <a href="#novedades" class={buttonVariants({ variant: 'outline-light', size: 'lg' })}>Ver novedades</a>
+        </div>
       </div>
     </div>
+
+    {hasVideo ? (
+      <button
+        type="button"
+        class="absolute right-5 bottom-5 z-10 grid size-11 place-items-center rounded-full border border-white/40 bg-black/25 text-white backdrop-blur-sm transition-colors hover:bg-black/45 sm:right-8 sm:bottom-8"
+        aria-label="Reproducir video"
+        data-hero-toggle
+        data-playing="false"
+      >
+        <Pause class="pause-icon size-4" stroke-width={1.75} />
+        <Play class="play-icon size-4" stroke-width={1.75} />
+      </button>
+    ) : productPhoto && product && (
+      <a
+        href={`/productos/${product.slug}`}
+        class="group absolute top-6 right-5 z-10 hidden animate-rise items-center gap-3 rounded-full border border-white/30 bg-black/25 py-2 pr-2 pl-4 text-sm backdrop-blur-md transition-colors [animation-delay:600ms] hover:bg-black/45 md:flex lg:top-10 lg:right-12"
+      >
+        <span class="text-white/70">En la foto</span>
+        <span class="max-w-52 truncate font-medium">{product.name}</span>
+        <span class="text-white/70">{formatCurrency(product.price)}</span>
+        <span class="grid size-8 place-items-center rounded-full bg-white text-ink transition-transform duration-300 group-hover:translate-x-0.5">
+          <ArrowRight class="size-3.5" stroke-width={1.75} />
+        </span>
+      </a>
+    )}
   </div>
 </section>
+
+<style>
+  [data-hero-toggle][data-playing='false'] .pause-icon,
+  [data-hero-toggle][data-playing='true'] .play-icon {
+    display: none;
+  }
+</style>
+
+<script>
+  // El video arranca solo si el usuario no pidió reducir movimiento ni ahorrar datos.
+  // Mientras tanto (o si no arranca) se ve la foto de portada.
+  const video = document.querySelector<HTMLVideoElement>('[data-hero-video]')
+  const toggle = document.querySelector<HTMLButtonElement>('[data-hero-toggle]')
+  if (video && toggle) {
+    const connection = (navigator as Navigator & { connection?: { saveData?: boolean } }).connection
+    const calm = window.matchMedia('(prefers-reduced-motion: reduce)').matches || connection?.saveData === true
+    const play = () => {
+      video.preload = 'auto'
+      video.play().catch(() => {})
+    }
+    video.addEventListener('playing', () => {
+      video.classList.replace('opacity-0', 'opacity-100')
+      toggle.dataset.playing = 'true'
+      toggle.setAttribute('aria-label', 'Pausar video')
+    })
+    video.addEventListener('pause', () => {
+      toggle.dataset.playing = 'false'
+      toggle.setAttribute('aria-label', 'Reproducir video')
+    })
+    toggle.addEventListener('click', () => (video.paused ? play() : video.pause()))
+    if (!calm) play()
+  }
+</script>

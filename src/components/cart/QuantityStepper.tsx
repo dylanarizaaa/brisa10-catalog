@@ -10,10 +10,10 @@ interface Props {
 }
 
 export function QuantityStepper({ value, onChange, label, size = 'lg' }: Props) {
-  const button = `grid ${size === 'lg' ? 'size-11' : 'size-9'} place-items-center rounded-full transition-colors hover:bg-sand disabled:pointer-events-none disabled:opacity-35`
+  const button = `grid ${size === 'lg' ? 'size-11' : 'size-9'} place-items-center rounded-[2px] transition-colors hover:bg-sand disabled:pointer-events-none disabled:opacity-35`
   return (
     <div
-      className={`inline-flex items-center rounded-full border border-input bg-card p-1 ${size === 'lg' ? 'h-13' : 'h-11'}`}
+      className={`inline-flex items-center rounded-[2px] border border-input bg-card p-0.5 ${size === 'lg' ? 'h-13' : 'h-11'}`}
       role="group"
       aria-label={label ? `Cantidad de ${label}` : 'Cantidad'}
     >

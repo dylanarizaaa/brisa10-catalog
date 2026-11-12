@@ -23,6 +23,30 @@ export const site = {
     facebook: 'https://www.facebook.com/',
   },
 
+  /**
+   * Portada del inicio. Los archivos van en public/media/ (ver README, "Video de presentación").
+   * Mientras los campos estén vacíos, la portada usa la foto de un producto destacado.
+   */
+  hero: {
+    video: {
+      /** Video horizontal (16:9), MP4 (H.264) o WebM, sin audio. Ej.: '/media/hero.mp4'. */
+      desktop: '',
+      /** Video vertical (4:5 o 9:16) para celulares. Opcional: sin él se usa el horizontal. */
+      mobile: '',
+    },
+    /** Foto fija de la portada; también se ve mientras carga el video. Ej.: '/media/hero.jpg'. */
+    image: '',
+    /** Texto alternativo de la foto o del video. */
+    alt: '',
+  },
+
+  // PENDIENTE: ajustar estos textos con la voz real del negocio.
+  brand: {
+    statement: 'Elegimos cada pieza pensando en cómo se verá en tu casa o en las manos de alguien especial.',
+    detail:
+      'Cerámicas, peluches, decoración y regalos que se notan. Todo lo que ves aquí está en nuestra tienda de Bogotá y lo puedes pedir por WhatsApp.',
+  },
+
   // El costo por ubicación aún no se calcula: se confirma por WhatsApp.
   shipping: {
     summary: 'Envíos a domicilio en Bogotá',

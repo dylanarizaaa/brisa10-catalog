@@ -32,7 +32,7 @@ export function CatalogToolbar({ params }: Props) {
       action="/catalogo"
       method="get"
       role="search"
-      className="flex flex-col gap-3 md:flex-row md:items-center md:gap-5"
+      className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between md:gap-6"
       onSubmit={(event) => {
         event.preventDefault()
         go({})
@@ -41,11 +41,11 @@ export function CatalogToolbar({ params }: Props) {
       {params.categoria && <input type="hidden" name="categoria" value={params.categoria} />}
       {params.orden !== 'recientes' && <input type="hidden" name="orden" value={params.orden} />}
 
-      <div className="relative flex-1">
+      <div className="relative flex-1 md:max-w-md">
         <Label htmlFor="catalog-search" className="sr-only">
           Buscar productos
         </Label>
-        <Search className="pointer-events-none absolute top-1/2 left-4.5 size-[1.125rem] -translate-y-1/2 text-stone" />
+        <Search className="pointer-events-none absolute top-1/2 left-4 size-[1.125rem] -translate-y-1/2 text-stone" />
         <Input
           id="catalog-search"
           type="search"
@@ -56,9 +56,9 @@ export function CatalogToolbar({ params }: Props) {
           placeholder="Buscar productos…"
           autoComplete="off"
           enterKeyHint="search"
-          className="h-13 rounded-full pr-28 pl-12"
+          className="h-12 pr-24 pl-11"
         />
-        <Button type="submit" size="sm" className="absolute top-1/2 right-2 h-9 -translate-y-1/2 px-5">
+        <Button type="submit" size="sm" className="absolute top-1/2 right-1.5 h-9 -translate-y-1/2 px-4">
           Buscar
         </Button>
       </div>
@@ -68,7 +68,7 @@ export function CatalogToolbar({ params }: Props) {
           Ordenar por
         </Label>
         <Select value={params.orden} onValueChange={(value) => go({ orden: value as CatalogSort })}>
-          <SelectTrigger id="catalog-sort" className="w-full flex-1 data-[size=default]:h-13 md:w-60 md:flex-none">
+          <SelectTrigger id="catalog-sort" className="w-full flex-1 data-[size=default]:h-12 md:w-56 md:flex-none">
             <SelectValue>{sortLabel}</SelectValue>
           </SelectTrigger>
           <SelectContent position="popper" align="end">

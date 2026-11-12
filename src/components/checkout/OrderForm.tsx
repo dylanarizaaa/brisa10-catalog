@@ -41,8 +41,8 @@ function Field({ id, label, optional, error, children }: { id: string; label: st
 
 function StepTitle({ step, children }: { step: number; children: ReactNode }) {
   return (
-    <legend className="float-left mb-5 flex w-full items-center gap-3 font-display text-[1.75rem]">
-      <span className="grid size-9 place-items-center rounded-full bg-clay font-sans text-sm font-semibold text-white" aria-hidden="true">
+    <legend className="float-left mb-6 flex w-full items-center gap-3 font-display text-[2rem] leading-none">
+      <span className="grid size-8 place-items-center rounded-full border border-ink font-sans text-xs font-semibold" aria-hidden="true">
         {step}
       </span>
       {children}
@@ -74,11 +74,11 @@ export function OrderForm({ businessName }: Props) {
 
   if (sent) {
     return (
-      <div className="grain flex flex-col items-center gap-5 rounded-[2rem] bg-sage-soft px-6 py-16 text-center sm:py-20">
-        <span className="arch grid h-24 w-20 place-items-center bg-sage text-cream">
-          <CircleCheck className="size-9" strokeWidth={1.5} />
+      <div className="flex flex-col items-center gap-5 rounded-[var(--radius-card)] bg-sage-soft px-6 py-20 text-center sm:py-24">
+        <span className="grid size-16 place-items-center rounded-full bg-sage text-white">
+          <CircleCheck className="size-7" strokeWidth={1.5} />
         </span>
-        <h2 className="text-3xl sm:text-4xl">¡Gracias! Recibimos tu solicitud</h2>
+        <h2 className="text-[2.25rem] leading-tight sm:text-5xl">¡Gracias! Recibimos tu solicitud</h2>
         <p className="max-w-md leading-relaxed text-ink/80">
           Te responderemos por WhatsApp para confirmar disponibilidad, entrega y forma de pago. El pedido queda en firme
           cuando lo confirmemos contigo.
@@ -132,7 +132,7 @@ export function OrderForm({ businessName }: Props) {
 
   return (
     <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_25rem] lg:gap-12">
-      <form onSubmit={handleSubmit} noValidate className="flex min-w-0 flex-col gap-6">
+      <form onSubmit={handleSubmit} noValidate className="flex min-w-0 flex-col gap-10">
         <div id="order-notices" className="empty:hidden">
           <CartNotices check={check} onRetry={() => void check.recheck()} />
           {blocked && (
@@ -153,7 +153,7 @@ export function OrderForm({ businessName }: Props) {
           )}
         </div>
 
-        <fieldset className="rounded-[1.75rem] border border-linen bg-card p-5 shadow-soft sm:p-8">
+        <fieldset className="border-t border-linen pt-8">
           <StepTitle step={1}>Tus datos</StepTitle>
           <div className="clear-both grid gap-5 sm:grid-cols-2">
             <Field id="order-name" label="Nombre" error={errors.name}>
@@ -180,7 +180,7 @@ export function OrderForm({ businessName }: Props) {
           </div>
         </fieldset>
 
-        <fieldset className="rounded-[1.75rem] border border-linen bg-card p-5 shadow-soft sm:p-8">
+        <fieldset className="border-t border-linen pt-8">
           <StepTitle step={2}>Entrega</StepTitle>
           <div className="clear-both flex flex-col gap-5">
             <RadioGroup
@@ -193,13 +193,13 @@ export function OrderForm({ businessName }: Props) {
                 <Label
                   key={value}
                   htmlFor={`delivery-${value}`}
-                  className="flex cursor-pointer items-start gap-3 rounded-2xl border border-input bg-cream/60 p-4 leading-normal font-normal transition-colors select-auto hover:border-clay/60 has-data-checked:border-clay has-data-checked:bg-clay-soft/50"
+                  className="flex cursor-pointer items-start gap-3 rounded-[2px] border border-input bg-paper p-4 leading-normal font-normal transition-colors select-auto hover:border-ink/50 has-data-checked:border-ink has-data-checked:bg-cream"
                 >
                   <RadioGroupItem id={`delivery-${value}`} value={value} className="mt-0.5" />
                   <span className="flex flex-1 flex-col gap-1">
                     <span className="flex items-center justify-between gap-2 text-[0.9375rem] font-medium">
                       {title}
-                      <Icon className="size-5 shrink-0 text-sage" strokeWidth={1.5} />
+                      <Icon className="size-5 shrink-0 text-ink" strokeWidth={1.25} />
                     </span>
                     <span className="text-sm text-stone">{text}</span>
                   </span>
@@ -262,14 +262,14 @@ export function OrderForm({ businessName }: Props) {
           <div
             ref={readyRef}
             tabIndex={-1}
-            className="grain flex animate-in flex-col gap-5 rounded-[1.75rem] bg-sage-soft p-6 outline-none duration-500 fade-in slide-in-from-bottom-2 sm:p-8"
+            className="flex animate-in flex-col gap-5 rounded-[var(--radius-card)] bg-sage-soft p-6 outline-none duration-500 fade-in slide-in-from-bottom-2 sm:p-8"
           >
             <div className="flex items-start gap-4">
-              <span className="grid size-11 shrink-0 place-items-center rounded-full bg-sage text-cream">
+              <span className="grid size-11 shrink-0 place-items-center rounded-full bg-sage text-white">
                 <CircleCheck className="size-5" strokeWidth={1.75} />
               </span>
               <div className="flex flex-col gap-2">
-                <h2 className="text-[1.75rem] leading-tight">Tu pedido está listo para enviar</h2>
+                <h2 className="text-[2rem] leading-tight">Tu pedido está listo para enviar</h2>
                 <p className="text-sm leading-relaxed text-ink/80">
                   Verificamos precios y disponibilidad. Al tocar el botón se abre WhatsApp con el resumen escrito:{' '}
                   <strong className="font-medium">solo falta que lo envíes</strong>. El pedido queda pendiente hasta que te

@@ -4,7 +4,7 @@ import { site } from '@/config/site'
 /** Información práctica de la página de producto: entregas, cómo pedir y pago. */
 export function ProductInfoAccordion() {
   return (
-    <Accordion type="single" collapsible defaultValue="envios" className="border-y border-linen">
+    <Accordion type="single" collapsible defaultValue="envios" className="border-b border-linen">
       <AccordionItem value="envios">
         <AccordionTrigger>Envíos y entregas</AccordionTrigger>
         <AccordionContent>

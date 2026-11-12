@@ -1,7 +1,9 @@
 ---
 import { Check, ImageOff, Plus } from '@lucide/astro'
+import SocialIcon from '@/components/common/SocialIcon.astro'
 import { formatCurrency } from '@/lib/formatCurrency'
-import { productImageUrl } from '@/services/supabase/client'
+import { whatsappLink } from '@/lib/whatsapp'
+import { productImageSrcset, productImageUrl } from '@/services/supabase/client'
 import type { ProductCard } from '@/types/product'
 import AvailabilityBadge from './AvailabilityBadge.astro'
 
@@ -9,85 +11,142 @@ interface Props {
   product: ProductCard
   /** Las primeras tarjetas visibles cargan la foto de inmediato; el resto, al acercarse. */
   eager?: boolean
+  /** La primera foto visible de la página se descarga antes que todo lo demás. */
+  priority?: boolean
+  /** Ancho aproximado de la tarjeta, para elegir el tamaño de foto cuando hay redimensionado. */
+  sizes?: string
 }
-const { product, eager = false } = Astro.props
+const { product, eager = false, priority = false, sizes = '(min-width: 1024px) 25vw, (min-width: 768px) 33vw, 50vw' } = Astro.props
 const soldOut = product.availability === 'agotado'
+const main = product.main_image_path
+const second = product.second_image_path
 // Datos mínimos para agregar al carrito desde la tarjeta (script en MainLayout).
-const quickAdd = JSON.stringify({
-  id: product.id,
-  slug: product.slug,
-  name: product.name,
-  price: product.price,
-  image: product.main_image_path,
-})
+const quickAdd = JSON.stringify({ id: product.id, slug: product.slug, name: product.name, price: product.price, image: main })
+const consult = soldOut ? whatsappLink(`Hola, me interesa *${product.name}*. ¿Va a volver a estar disponible?`) : null
 ---
 
-<article class="product-card group relative flex flex-col gap-3.5">
-  <div class="relative aspect-[4/5] overflow-hidden rounded-[var(--radius-card)] bg-sand transition-shadow duration-300 group-hover:shadow-lift">
-    {product.main_image_path ? (
-      <img
-        src={productImageUrl(product.main_image_path)}
-        alt=""
-        width="600"
-        height="750"
-        loading={eager ? 'eager' : 'lazy'}
-        decoding="async"
-        class:list={[
-          'size-full object-cover transition-transform duration-700 ease-[var(--ease-soft)] group-hover:scale-[1.06]',
-          soldOut && 'opacity-60 grayscale-[35%]',
-        ]}
-      />
+<article class="product-card group relative flex flex-col">
+  <div class="relative aspect-[4/5] overflow-hidden rounded-[var(--radius-card)] bg-sand">
+    {main ? (
+      <>
+        <img
+          src={productImageUrl(main, 700)}
+          srcset={productImageSrcset(main)}
+          sizes={sizes}
+          alt=""
+          width="700"
+          height="875"
+          loading={eager || priority ? 'eager' : 'lazy'}
+          fetchpriority={priority ? 'high' : undefined}
+          decoding="async"
+          class:list={[
+            'absolute inset-0 size-full object-cover transition-[transform,opacity] duration-[900ms] ease-[var(--ease-out-expo)] group-hover:scale-[1.04]',
+            soldOut && 'opacity-55 saturate-[0.6]',
+          ]}
+        />
+        {second && (
+          <img
+            src={productImageUrl(second, 700)}
+            srcset={productImageSrcset(second)}
+            sizes={sizes}
+            alt=""
+            width="700"
+            height="875"
+            loading="lazy"
+            decoding="async"
+            class="second-image absolute inset-0 size-full object-cover opacity-0 transition-opacity duration-700 ease-[var(--ease-soft)]"
+          />
+        )}
+      </>
     ) : (
       <div class="grid size-full place-items-center text-linen">
-        <ImageOff class="size-10" />
+        <ImageOff class="size-9" stroke-width={1.25} />
       </div>
     )}
-    {product.availability !== 'disponible' && (
-      <div class="absolute top-3 left-3">
-        <AvailabilityBadge availability={product.availability} onImage />
-      </div>
+
+    {soldOut && (
+      <span class="absolute top-3 left-3 rounded-[2px] bg-paper px-2.5 py-1 text-[0.6875rem] font-semibold tracking-[0.12em] text-ink uppercase">Agotado</span>
     )}
-    {!soldOut && (
+
+    {!soldOut ? (
       <button
         type="button"
         data-quick-add={quickAdd}
         aria-label={`Agregar ${product.name} al carrito`}
-        class="quick-add absolute right-3 bottom-3 z-10 grid size-11 place-items-center rounded-full bg-cream text-ink shadow-soft transition-all duration-200 hover:bg-clay hover:text-white data-added:bg-sage data-added:text-white"
+        class="card-action absolute right-3 bottom-3 z-10 flex size-11 items-center justify-center gap-2 rounded-full bg-paper text-ink shadow-soft transition-[background-color,color,opacity,transform] duration-300 ease-[var(--ease-soft)] hover:bg-ink hover:text-white data-added:bg-sage data-added:text-white"
       >
-        <Plus class="icon-add size-5" />
-        <Check class="icon-done size-5" stroke-width={2.5} />
+        <Plus class="icon-add size-[1.125rem]" stroke-width={1.75} />
+        <Check class="icon-done size-[1.125rem]" stroke-width={2.25} />
+        <span class="action-label text-[0.8125rem] font-medium">
+          <span class="label-add">Agregar al carrito</span>
+          <span class="label-done">Agregado</span>
+        </span>
       </button>
+    ) : consult && (
+      <a
+        href={consult}
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label={`Consultar por WhatsApp cuándo vuelve ${product.name}`}
+        class="card-action absolute right-3 bottom-3 z-10 flex size-11 items-center justify-center gap-2 rounded-full bg-paper text-ink shadow-soft transition-[background-color,color,opacity,transform] duration-300 ease-[var(--ease-soft)] hover:bg-ink hover:text-white"
+      >
+        <SocialIcon name="whatsapp" class="size-[1.125rem]" />
+        <span class="action-label text-[0.8125rem] font-medium">Consultar disponibilidad</span>
+      </a>
     )}
   </div>
-  <div class="flex flex-col gap-1 px-1">
-    <p class="text-[0.6875rem] font-medium tracking-[0.14em] text-stone uppercase">{product.category_name}</p>
-    <h3 class="font-sans text-[0.9375rem] leading-snug font-medium tracking-normal">
-      <!-- El enlace cubre toda la tarjeta (::after), así el área táctil es la tarjeta completa. -->
-      <a href={`/productos/${product.slug}`} class="after:absolute after:inset-0 after:rounded-[var(--radius-card)]">
+
+  <div class="flex flex-col gap-1 pt-4">
+    <p class="text-[0.6875rem] font-medium tracking-[0.16em] text-stone uppercase">{product.category_name}</p>
+    <h3 class="font-sans text-[0.9375rem] leading-snug tracking-normal text-ink">
+      <!-- El enlace cubre toda la tarjeta (::after): el área táctil es la tarjeta completa. -->
+      <a href={`/productos/${product.slug}`} class="link-draw after:absolute after:inset-0 after:rounded-[var(--radius-card)]">
         {product.name}
       </a>
     </h3>
-    <p class:list={['font-display text-lg', soldOut ? 'text-stone' : 'text-ink']}>{formatCurrency(product.price)}</p>
+    <div class="mt-0.5 flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
+      <p class:list={['text-[0.9375rem] font-semibold tabular-nums', soldOut ? 'text-stone' : 'text-ink']}>{formatCurrency(product.price)}</p>
+      <AvailabilityBadge availability={product.availability} />
+    </div>
   </div>
 </article>
 
 <style is:global>
-  .icon-done,
-  .quick-add[data-added] .icon-add {
+  .product-card .icon-done,
+  .product-card .label-done,
+  .product-card [data-added] .icon-add,
+  .product-card [data-added] .label-add {
     display: none;
   }
-  .quick-add[data-added] .icon-done {
-    display: block;
+  .product-card [data-added] .icon-done,
+  .product-card [data-added] .label-done {
+    display: inline;
   }
-  /* Con ratón, el botón aparece al pasar por la tarjeta; en pantallas táctiles siempre está visible. */
-  @media (hover: hover) {
-    .quick-add {
-      opacity: 0;
-      transform: translateY(6px);
+  /* En pantallas táctiles: botón redondo siempre visible, solo icono. */
+  .product-card .action-label {
+    display: none;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    /* La segunda foto aparece al pasar el cursor. */
+    .product-card:hover .second-image {
+      opacity: 1;
     }
-    .product-card:hover .quick-add,
-    .quick-add:focus-visible,
-    .quick-add[data-added] {
+    /* La acción se convierte en una barra que sube al pasar el cursor. */
+    .product-card .card-action {
+      left: 0.75rem;
+      width: auto;
+      height: 2.75rem;
+      border-radius: 2px;
+      opacity: 0;
+      transform: translateY(0.75rem);
+    }
+    .product-card .action-label {
+      display: inline;
+    }
+    .product-card:hover .card-action,
+    .product-card .card-action:focus-visible,
+    .product-card .card-action[data-added] {
       opacity: 1;
       transform: none;
     }

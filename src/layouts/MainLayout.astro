@@ -1,14 +1,16 @@
 ---
 import '@/styles/global.css'
 import dmSans from '@fontsource-variable/dm-sans/files/dm-sans-latin-wght-normal.woff2?url'
-import fraunces from '@fontsource-variable/fraunces/files/fraunces-latin-wght-normal.woff2?url'
+import instrumentSerif from '@fontsource/instrument-serif/files/instrument-serif-latin-400-normal.woff2?url'
 import AnnouncementBar from '@/components/layout/AnnouncementBar.astro'
 import Footer from '@/components/layout/Footer.astro'
 import Header from '@/components/layout/Header.astro'
 import WhatsAppFab from '@/components/layout/WhatsAppFab.astro'
 import { site } from '@/config/site'
 import { getBusiness } from '@/services/supabase/business'
+import { getCategories } from '@/services/supabase/categories'
 import { supabaseOrigin } from '@/services/supabase/client'
+import type { Category } from '@/types/category'
 
 interface Props {
   /** Título de la página; se le agrega el nombre del negocio. Sin él se usa nombre + lema. */
@@ -23,9 +25,19 @@ interface Props {
   noindex?: boolean
   /** Oculta el botón flotante de WhatsApp (carrito y pedido: taparía los totales). */
   hideWhatsAppFab?: boolean
+  /** Categorías ya consultadas por la página (evita repetir la consulta para el menú). */
+  categories?: Category[]
 }
 
-const business = await getBusiness()
+// Menú y pie muestran las categorías; si la consulta falla, se muestran sin ellas.
+const [business, categories] = await Promise.all([
+  getBusiness(),
+  Astro.props.categories ??
+    getCategories().catch((error) => {
+      console.error('[menú] categorías:', error)
+      return []
+    }),
+])
 const name = business.business_name
 const { title, description = site.description, image, canonicalPath, ogType = 'website', noindex = false, hideWhatsAppFab = false } = Astro.props
 const fullTitle = title ? `${title} · ${name}` : `${name} · ${site.tagline}`
@@ -43,7 +55,7 @@ const ogImage = image ?? new URL('/og-default.png', Astro.site).href
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="theme-color" content="#faf6f0" />
+    <meta name="theme-color" content="#ffffff" />
     {noindex && <meta name="robots" content="noindex, follow" />}
     <meta property="og:type" content={ogType} />
     <meta property="og:site_name" content={name} />
@@ -57,7 +69,7 @@ const ogImage = image ?? new URL('/og-default.png', Astro.site).href
     <meta property="og:image:alt" content={title ?? name} />
     <meta name="twitter:card" content="summary_large_image" />
     <!-- Las dos fuentes del primer pantallazo se piden de inmediato; las fotos vienen de Supabase. -->
-    <link rel="preload" as="font" type="font/woff2" href={fraunces} crossorigin />
+    <link rel="preload" as="font" type="font/woff2" href={instrumentSerif} crossorigin />
     <link rel="preload" as="font" type="font/woff2" href={dmSans} crossorigin />
     {supabaseOrigin && <link rel="preconnect" href={supabaseOrigin} />}
     <slot name="head" />
@@ -69,15 +81,15 @@ const ogImage = image ?? new URL('/og-default.png', Astro.site).href
     </script>
   </head>
   <body class="flex min-h-dvh flex-col">
-    <a href="#contenido" class="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 focus:rounded-full focus:bg-ink focus:px-4 focus:py-2 focus:text-cream">
+    <a href="#contenido" class="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 focus:rounded-[2px] focus:bg-ink focus:px-4 focus:py-2 focus:text-white">
       Saltar al contenido
     </a>
     <AnnouncementBar />
-    <Header businessName={name} />
+    <Header businessName={name} categories={categories} />
     <main id="contenido" class="flex-1">
       <slot />
     </main>
-    <Footer business={business} />
+    <Footer business={business} categories={categories} />
     {!hideWhatsAppFab && <WhatsAppFab businessName={name} />}
     <!-- Anuncios para lectores de pantalla (p. ej. "agregado al carrito"). -->
     <p id="live-region" class="sr-only" role="status" aria-live="polite"></p>

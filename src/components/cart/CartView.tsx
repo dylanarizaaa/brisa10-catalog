@@ -11,11 +11,11 @@ import { QuantityStepper } from './QuantityStepper'
 
 export function EmptyCart() {
   return (
-    <div className="grain flex flex-col items-center gap-5 rounded-[2rem] bg-sand/60 px-6 py-16 text-center sm:py-20">
-      <span className="arch grid h-24 w-20 place-items-center bg-clay-soft text-clay">
-        <ShoppingBag className="size-8" strokeWidth={1.5} />
+    <div className="flex flex-col items-center gap-5 border-y border-linen px-6 py-20 text-center sm:py-24">
+      <span className="grid size-16 place-items-center rounded-full bg-sand text-ink">
+        <ShoppingBag className="size-7" strokeWidth={1.25} />
       </span>
-      <h2 className="text-3xl">Tu carrito está vacío</h2>
+      <h2 className="text-[2.25rem] leading-tight">Tu carrito está vacío</h2>
       <p className="max-w-sm leading-relaxed text-stone">Explora el catálogo y agrega lo que te guste. Tu selección se guarda en este dispositivo.</p>
       <Button asChild size="lg">
         <a href="/catalogo">Explorar catálogo</a>
@@ -38,13 +38,13 @@ export function CartView() {
       <div className="flex min-w-0 flex-col gap-5">
         <CartNotices check={check} onRetry={() => void check.recheck()} />
 
-        <ul className="flex flex-col gap-3">
+        <ul className="flex flex-col">
           {items.map((item) => {
             const issue = check.issues[item.id]
             return (
               <li
                 key={item.id}
-                className={`flex gap-4 rounded-[var(--radius-card)] border bg-card p-3 transition-colors sm:p-4 ${issue ? 'border-clay/50' : 'border-linen'}`}
+                className={`flex gap-4 border-b py-5 transition-colors first:border-t sm:gap-6 ${issue ? 'border-clay/50' : 'border-linen'}`}
               >
                 <a href={`/productos/${item.slug}`} className="shrink-0" tabIndex={-1} aria-hidden="true">
                   {item.image ? (
@@ -54,19 +54,19 @@ export function CartView() {
                       width={96}
                       height={120}
                       loading="lazy"
-                      className={`h-[7.5rem] w-24 rounded-xl bg-sand object-cover sm:h-36 sm:w-28 ${issue === 'gone' || issue === 'sold_out' ? 'opacity-50 grayscale' : ''}`}
+                      className={`h-[7.5rem] w-24 rounded-[2px] bg-sand object-cover sm:h-40 sm:w-32 ${issue === 'gone' || issue === 'sold_out' ? 'opacity-50 grayscale' : ''}`}
                     />
                   ) : (
-                    <span className="grid h-[7.5rem] w-24 place-items-center rounded-xl bg-sand text-linen sm:h-36 sm:w-28">
+                    <span className="grid h-[7.5rem] w-24 place-items-center rounded-[2px] bg-sand text-linen sm:h-40 sm:w-32">
                       <ImageOff className="size-7" />
                     </span>
                   )}
                 </a>
 
-                <div className="flex min-w-0 flex-1 flex-col gap-2 py-1 pr-1">
+                <div className="flex min-w-0 flex-1 flex-col gap-2">
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
-                      <h2 className="font-sans text-[0.9375rem] leading-snug font-medium tracking-normal">
+                      <h2 className="font-display text-[1.375rem] leading-tight sm:text-2xl">
                         <a href={`/productos/${item.slug}`} className="hover:underline">
                           {item.name}
                         </a>
@@ -100,7 +100,7 @@ export function CartView() {
                         onChange={(quantity) => setQuantity(item.id, quantity)}
                       />
                     )}
-                    <p className="font-display text-lg tabular-nums" aria-label={`Subtotal: ${formatCurrency(item.price * item.quantity)}`}>
+                    <p className="text-[0.9375rem] font-semibold tabular-nums" aria-label={`Subtotal: ${formatCurrency(item.price * item.quantity)}`}>
                       {formatCurrency(item.price * item.quantity)}
                     </p>
                   </div>

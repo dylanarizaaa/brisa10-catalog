@@ -1,17 +1,19 @@
 ---
 import About from '@/components/home/About.astro'
-import Benefits from '@/components/home/Benefits.astro'
-import CategoryGrid from '@/components/home/CategoryGrid.astro'
+import BrandStatement from '@/components/home/BrandStatement.astro'
+import CategoryShowcase from '@/components/home/CategoryShowcase.astro'
+import EditorialSplit from '@/components/home/EditorialSplit.astro'
 import Hero from '@/components/home/Hero.astro'
-import Marquee from '@/components/home/Marquee.astro'
 import ProductSection from '@/components/home/ProductSection.astro'
-import ShippingInfo from '@/components/home/ShippingInfo.astro'
-import SocialBand from '@/components/home/SocialBand.astro'
+import PromoBanner from '@/components/home/PromoBanner.astro'
 import { site } from '@/config/site'
 import MainLayout from '@/layouts/MainLayout.astro'
+import { catalogUrl } from '@/lib/catalogUrl'
 import { getBusiness } from '@/services/supabase/business'
 import { getCategories } from '@/services/supabase/categories'
+import { productImageSrcset, productImageUrl } from '@/services/supabase/client'
 import { getCatalog } from '@/services/supabase/products'
+import type { ProductCard } from '@/types/product'
 
 // Si una consulta falla, su sección no se muestra y el resto de la página sigue en pie.
 async function orEmpty<T>(label: string, promise: Promise<T[]>): Promise<T[]> {
@@ -28,9 +30,45 @@ async function orEmpty<T>(label: string, promise: Promise<T[]>): Promise<T[]> {
 const [business, categories, featured, recent] = await Promise.all([
   getBusiness(),
   orEmpty('categorías', getCategories()),
-  orEmpty('destacados', getCatalog({ featured: true, limit: 4 }).then((page) => page.items)),
-  orEmpty('recientes', getCatalog({ sort: 'recientes', limit: 8 }).then((page) => page.items)),
+  orEmpty('destacados', getCatalog({ featured: true, limit: 8 }).then((page) => page.items)),
+  orEmpty('recientes', getCatalog({ sort: 'recientes', limit: 12 }).then((page) => page.items)),
 ])
+
+/*
+ * Fotos de las secciones visuales. Solo se usan fotos reales de productos publicados,
+ * y se reparten para no repetir la misma imagen en la portada, los bloques editoriales
+ * y el banner. Si no alcanzan, la sección usa su diseño sin foto.
+ */
+const pool: ProductCard[] = [...featured, ...recent].filter(
+  (product, index, all) => product.main_image_path && all.findIndex((other) => other.id === product.id) === index,
+)
+const used = new Set<string>()
+const claim = (product: ProductCard | undefined) => {
+  if (product?.main_image_path) used.add(product.main_image_path)
+  return product
+}
+const heroProduct = claim(pool[0])
+
+// Bloques editoriales: las dos primeras categorías con foto, con un producto propio cada una.
+const editorial = categories
+  .filter((category) => category.image_path)
+  .slice(0, 2)
+  .map((category) => {
+    const product = claim(pool.find((item) => item.category_slug === category.slug && !used.has(item.main_image_path!)))
+    const imagePath = product?.main_image_path ?? category.image_path!
+    const detail = product?.second_image_path ?? null
+    return {
+      category,
+      image: productImageUrl(imagePath, 1400),
+      srcset: productImageSrcset(imagePath, [700, 1000, 1400, 1800]),
+      detailImage: detail ? productImageUrl(detail, 600) : undefined,
+      text:
+        category.description ??
+        `Una selección de ${category.name.toLowerCase()} elegida pieza por pieza para decorar tus espacios o sorprender a alguien especial.`,
+    }
+  })
+const bannerProduct = pool.find((item) => !used.has(item.main_image_path!))
+const bannerImage = bannerProduct?.main_image_path ? productImageUrl(bannerProduct.main_image_path, 1800) : null
 
 // Datos estructurados del negocio para buscadores.
 const sameAs = Object.values(site.social).filter((url) => url && new URL(url).pathname.length > 1)
@@ -53,19 +91,32 @@ const jsonLd = {
 }
 ---
 
-<MainLayout>
+<MainLayout categories={categories}>
   <script slot="head" type="application/ld+json" set:html={JSON.stringify(jsonLd).replace(/</g, '\\u003c')} />
-  <Hero products={featured.length > 0 ? featured : recent} />
-  <Marquee words={categories.map((category) => category.name)} />
-  {categories.length > 0 && <CategoryGrid categories={categories} />}
+
+  <Hero product={heroProduct} />
+  <BrandStatement businessName={business.business_name} />
+  {categories.length > 0 && <CategoryShowcase categories={categories} />}
   {featured.length > 0 && (
-    <ProductSection eyebrow="Favoritos" title="Productos destacados" products={featured} href="/catalogo" tinted />
+    <ProductSection id="destacados" eyebrow="Favoritos de la tienda" title="Productos destacados" products={featured} tinted />
   )}
-  <About businessName={business.business_name} />
+  {editorial.map((block, index) => (
+    <EditorialSplit
+      image={block.image}
+      srcset={block.srcset}
+      detailImage={index === 0 ? block.detailImage : undefined}
+      alt={block.category.name}
+      eyebrow="Colección"
+      title={block.category.name}
+      text={block.text}
+      href={catalogUrl({ categoria: block.category.slug })}
+      linkLabel={`Ver ${block.category.name.toLowerCase()}`}
+      reverse={index % 2 === 1}
+    />
+  ))}
   {recent.length > 0 && (
-    <ProductSection eyebrow="Recién llegados" title="Lo más nuevo" products={recent} href="/catalogo?orden=recientes" />
+    <ProductSection id="novedades" eyebrow="Recién llegados" title="Lo más nuevo" products={recent.slice(0, 8)} layout="grid" />
   )}
-  <Benefits />
-  <ShippingInfo businessName={business.business_name} />
-  <SocialBand businessName={business.business_name} />
+  <PromoBanner businessName={business.business_name} image={bannerImage} />
+  <About businessName={business.business_name} />
 </MainLayout>

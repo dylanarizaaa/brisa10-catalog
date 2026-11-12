@@ -13,6 +13,8 @@ export interface ProductCard {
   category_slug: string
   /** Ruta dentro del bucket product-images, o null si no tiene foto. */
   main_image_path: string | null
+  /** Segunda foto, para mostrarla al pasar el cursor (migración 20261111000008; puede faltar). */
+  second_image_path?: string | null
 }
 
 export interface CatalogPage {

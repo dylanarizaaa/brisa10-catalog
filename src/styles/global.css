@@ -1,81 +1,81 @@
 @import 'tailwindcss';
 @import 'tw-animate-css';
 @import 'shadcn/tailwind.css';
-@import '@fontsource-variable/fraunces';
-@import '@fontsource-variable/fraunces/wght-italic.css';
+@import '@fontsource/instrument-serif/latin-400.css';
+@import '@fontsource/instrument-serif/latin-400-italic.css';
 @import '@fontsource-variable/dm-sans';
 
-/* Sistema de diseño: neutros cálidos, un acento terracota y un secundario salvia. */
+/*
+ * Sistema de diseño: e-commerce minimalista y editorial.
+ * Fondo blanco, neutros cálidos muy suaves, texto casi negro y un acento terracota
+ * que se usa con moderación (detalles, avisos, selección).
+ */
 @theme {
-  --font-display: 'Fraunces Variable', Georgia, 'Times New Roman', serif;
+  --font-display: 'Instrument Serif', 'Times New Roman', Georgia, serif;
   --font-sans: 'DM Sans Variable', ui-sans-serif, system-ui, sans-serif;
 
-  --color-cream: #faf6f0; /* fondo */
-  --color-sand: #efe6da; /* superficies y marcos de foto */
-  --color-linen: #e2d6c6; /* bordes */
-  --color-ink: #2b2622; /* texto */
-  --color-stone: #6b625a; /* texto secundario (AA sobre cream) */
-  --color-clay: #9c4f36; /* acento: botones y enlaces (AA con texto blanco) */
+  --color-paper: #ffffff; /* fondo principal */
+  --color-cream: #f8f5f1; /* secciones alternas y pie de página */
+  --color-sand: #f1ece6; /* marcos de foto y superficies suaves */
+  --color-linen: #e6dfd7; /* bordes y divisores */
+  --color-ink: #1a1817; /* texto y botones principales */
+  --color-stone: #6b645e; /* texto secundario (AA sobre blanco y cream) */
+  --color-clay: #9c4f36; /* acento (AA con texto blanco) */
   --color-clay-deep: #833f29;
-  --color-clay-soft: #f3ddd3;
-  --color-sage: #4f5d48; /* AA sobre sage-soft */
-  --color-sage-soft: #e3e8dd;
+  --color-clay-soft: #f5e6df; /* rubor: avisos suaves */
+  --color-sage: #4f5d48; /* confirmaciones (AA sobre sage-soft) */
+  --color-sage-soft: #e8ece3;
   --color-whatsapp: #1f7a4d;
 
-  --radius-card: 1.25rem;
+  --radius-card: 0.25rem;
   --ease-soft: cubic-bezier(0.22, 1, 0.36, 1);
-  --shadow-soft: 0 1px 2px rgb(43 38 34 / 0.04), 0 8px 24px -8px rgb(43 38 34 / 0.12);
-  --shadow-lift: 0 2px 4px rgb(43 38 34 / 0.05), 0 18px 40px -12px rgb(43 38 34 / 0.22);
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --shadow-soft: 0 1px 2px rgb(26 24 23 / 0.04), 0 6px 20px -10px rgb(26 24 23 / 0.12);
+  --shadow-lift: 0 2px 6px rgb(26 24 23 / 0.05), 0 18px 40px -16px rgb(26 24 23 / 0.2);
 
-  --animate-marquee: marquee 38s linear infinite;
-  --animate-spin-slow: spin 28s linear infinite;
-  --animate-float: float 7s ease-in-out infinite;
-  --animate-rise: rise 700ms var(--ease-soft) both;
   --animate-pop: pop 380ms var(--ease-soft);
+  --animate-rise: rise 1s var(--ease-out-expo) both;
+  --animate-hero-zoom: hero-zoom 2.4s var(--ease-out-expo) both;
 
-  @keyframes marquee {
-    to {
-      transform: translateX(-50%);
-    }
-  }
-  @keyframes float {
-    50% {
-      transform: translateY(-8px);
+  @keyframes pop {
+    40% {
+      transform: scale(1.35);
     }
   }
   @keyframes rise {
     from {
+      opacity: 0;
       transform: translateY(18px);
     }
   }
-  @keyframes pop {
-    40% {
-      transform: scale(1.35);
+  @keyframes hero-zoom {
+    from {
+      transform: scale(1.08);
     }
   }
 }
 
 /* Tema de shadcn/ui: sus variables apuntan a la paleta de la tienda. */
 :root {
-  --radius: 0.875rem;
-  --background: var(--color-cream);
+  --radius: 0.25rem;
+  --background: var(--color-paper);
   --foreground: var(--color-ink);
-  --card: #fffdf9;
+  --card: var(--color-paper);
   --card-foreground: var(--color-ink);
-  --popover: #fffdf9;
+  --popover: var(--color-paper);
   --popover-foreground: var(--color-ink);
-  --primary: var(--color-clay);
+  --primary: var(--color-ink);
   --primary-foreground: #ffffff;
   --secondary: var(--color-sand);
   --secondary-foreground: var(--color-ink);
   --muted: var(--color-sand);
   --muted-foreground: var(--color-stone);
-  --accent: var(--color-clay-soft);
+  --accent: var(--color-sand);
   --accent-foreground: var(--color-ink);
   --destructive: var(--color-clay-deep);
   --border: var(--color-linen);
-  --input: #d6c8b6;
-  --ring: var(--color-clay);
+  --input: #d6cec5;
+  --ring: var(--color-ink);
 }
 
 @theme inline {
@@ -114,6 +114,8 @@
   html {
     scroll-behavior: smooth;
     -webkit-text-size-adjust: 100%;
+    /* Deja ver los títulos bajo el encabezado fijo al saltar a un ancla. */
+    scroll-padding-top: 6rem;
   }
 
   body {
@@ -121,24 +123,33 @@
     -webkit-font-smoothing: antialiased;
   }
 
+  /* Títulos: serif editorial, grandes y con poco interlineado. */
   h1,
   h2,
-  h3 {
+  h3,
+  .font-display {
     font-family: var(--font-display);
-    font-weight: 500;
-    letter-spacing: -0.015em;
+    font-weight: 400;
+    letter-spacing: -0.012em;
     text-wrap: balance;
   }
 
   :focus-visible {
-    outline: 2px solid var(--color-clay);
+    outline: 2px solid var(--color-ink);
     outline-offset: 3px;
-    border-radius: 4px;
+    border-radius: 2px;
   }
 
   button:not(:disabled),
   [role='button']:not(:disabled) {
     cursor: pointer;
+  }
+
+  /* Sin la "x" nativa de los campos de búsqueda: no sigue el diseño y ya hay un botón propio. */
+  input[type='search']::-webkit-search-cancel-button,
+  input[type='search']::-webkit-search-decoration {
+    -webkit-appearance: none;
+    appearance: none;
   }
 
   ::selection {
@@ -162,7 +173,7 @@
 @layer components {
   .container-page {
     width: 100%;
-    max-width: 78rem;
+    max-width: 90rem;
     margin-inline: auto;
     padding-inline: 1.25rem;
   }
@@ -171,78 +182,116 @@
       padding-inline: 2rem;
     }
   }
+  @media (min-width: 1280px) {
+    .container-page {
+      padding-inline: 3rem;
+    }
+  }
 
-  /* Rótulo pequeño en mayúsculas sobre los títulos de sección. */
+  /* Rótulo pequeño en mayúsculas sobre los títulos. */
   .eyebrow {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.625rem;
+    display: inline-block;
+    font-family: var(--font-sans);
     font-size: 0.75rem;
     font-weight: 600;
-    letter-spacing: 0.18em;
+    letter-spacing: 0.2em;
     text-transform: uppercase;
-    color: var(--color-clay);
-  }
-  .eyebrow::before {
-    content: '';
-    width: 1.75rem;
-    height: 1px;
-    background: currentColor;
-  }
-  .eyebrow-plain::before {
-    display: none;
+    color: var(--color-stone);
   }
 
-  /* Textura de papel muy sutil para los fondos grandes. */
-  .grain {
-    position: relative;
-    isolation: isolate;
-  }
-  .grain::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    z-index: -1;
-    pointer-events: none;
-    opacity: 0.5;
-    mix-blend-mode: multiply;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .45 0 0 0 0 .38 0 0 0 0 .3 0 0 0 .09 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
-  }
-
-  /* Forma de arco: el motivo visual de la tienda. */
-  .arch {
-    border-radius: 999px 999px var(--radius-card) var(--radius-card);
-  }
-
-  /* Enlace con subrayado que se dibuja al pasar el cursor. */
+  /* Enlace de texto con subrayado fino que se dibuja al pasar el cursor. */
   .link-draw {
     background: linear-gradient(currentColor, currentColor) 0 100% / 0 1px no-repeat;
-    transition: background-size 260ms var(--ease-soft);
+    transition: background-size 320ms var(--ease-soft);
   }
-  .link-draw:hover {
+  .link-draw:hover,
+  .link-draw:focus-visible,
+  .group:hover .link-draw {
     background-size: 100% 1px;
+  }
+
+  /* Enlace editorial: subrayado visible que se recoge y se vuelve a dibujar. */
+  .link-underline {
+    background: linear-gradient(currentColor, currentColor) 100% 100% / 100% 1px no-repeat;
+    padding-bottom: 2px;
+    transition: background-size 420ms var(--ease-soft);
+  }
+  .link-underline:hover,
+  .group:hover .link-underline {
+    animation: underline-redraw 640ms var(--ease-soft);
+  }
+  @keyframes underline-redraw {
+    0% {
+      background-size: 100% 1px;
+      background-position: 100% 100%;
+    }
+    45% {
+      background-size: 0 1px;
+      background-position: 100% 100%;
+    }
+    46% {
+      background-size: 0 1px;
+      background-position: 0 100%;
+    }
+    100% {
+      background-size: 100% 1px;
+      background-position: 0 100%;
+    }
+  }
+
+  /* Carriles con desplazamiento horizontal sin barra visible (carruseles, etiquetas). */
+  .scroll-rail {
+    scrollbar-width: none;
+    overscroll-behavior-x: contain;
+  }
+  .scroll-rail::-webkit-scrollbar {
+    display: none;
   }
 }
 
 /*
- * Aparición suave al hacer scroll. Solo se oculta contenido si el navegador
- * ejecutó el script que luego lo muestra (clase .reveal-on en <html>).
+ * Apariciones al hacer scroll. Solo se oculta contenido si el navegador ejecutó
+ * el script que luego lo muestra (clase .reveal-on en <html>, ver MainLayout).
+ *   data-reveal         sube y aparece
+ *   data-reveal="fade"  solo aparece
+ *   data-reveal="image" la imagen se descubre de abajo hacia arriba
+ * --reveal-delay escalona elementos de una misma fila.
  */
 .reveal-on [data-reveal] {
   opacity: 0;
-  transform: translateY(22px);
+  transform: translateY(16px);
   transition:
-    opacity 700ms var(--ease-soft),
-    transform 700ms var(--ease-soft);
+    opacity 900ms var(--ease-out-expo),
+    transform 900ms var(--ease-out-expo),
+    clip-path 1200ms var(--ease-out-expo);
+  transition-delay: var(--reveal-delay, 0ms);
+}
+.reveal-on [data-reveal='fade'] {
+  transform: none;
+}
+.reveal-on [data-reveal='image'] {
+  opacity: 1;
+  transform: none;
+  clip-path: inset(12% 0 0 0);
+}
+.reveal-on [data-reveal='image'] img {
+  transform: scale(1.08);
+  transition: transform 1600ms var(--ease-out-expo);
   transition-delay: var(--reveal-delay, 0ms);
 }
 .reveal-on [data-reveal].is-visible {
   opacity: 1;
   transform: none;
+  clip-path: inset(0 0 0 0);
+}
+.reveal-on [data-reveal='image'].is-visible img {
+  transform: none;
 }
 @media (prefers-reduced-motion: reduce) {
-  .reveal-on [data-reveal] {
+  .reveal-on [data-reveal],
+  .reveal-on [data-reveal] img {
     opacity: 1;
     transform: none;
+    clip-path: none;
   }
 }

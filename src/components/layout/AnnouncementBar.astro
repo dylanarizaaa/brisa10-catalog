@@ -1,18 +1,14 @@
 ---
-import Sparkle from '@/components/common/Sparkle.astro'
 import { site } from '@/config/site'
+
+// En el celular cabe un mensaje; en pantallas anchas se muestran los tres.
+const messages = [site.shipping.summary, 'Haz tu pedido por WhatsApp', 'Recoge en tienda sin costo']
 ---
 
-<aside aria-label="Avisos de la tienda">
-<p class="bg-ink px-4 py-2 text-center text-[0.8125rem] tracking-wide text-cream/90">
-  <span class="inline-flex items-center gap-3">
-    <Sparkle class="size-2.5 text-clay-soft" />
-    <span>{site.shipping.summary}</span>
-    <Sparkle class="hidden size-2.5 text-clay-soft sm:block" />
-    <span class="hidden sm:inline">Haz tu pedido por WhatsApp</span>
-    <Sparkle class="hidden size-2.5 text-clay-soft md:block" />
-    <span class="hidden md:inline">Recoge en tienda sin costo</span>
-    <Sparkle class="size-2.5 text-clay-soft" />
-  </span>
-</p>
+<aside aria-label="Avisos de la tienda" class="bg-ink text-white">
+  <ul class="container-page flex h-9 items-center justify-center gap-10 text-[0.75rem] tracking-[0.06em]">
+    {messages.map((message, index) => (
+      <li class:list={[index > 0 && 'hidden md:block']}>{message}</li>
+    ))}
+  </ul>
 </aside>

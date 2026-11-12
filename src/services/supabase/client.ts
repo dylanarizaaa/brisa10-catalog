@@ -45,8 +45,25 @@ export async function rpc<T>(fn: string, params: Record<string, unknown> = {}): 
   return (await response.json()) as T
 }
 
-/** URL pública de una foto del bucket product-images. */
-export function productImageUrl(storagePath: string): string {
-  const path = storagePath.split('/').map(encodeURIComponent).join('/')
-  return `${url}/storage/v1/object/public/product-images/${path}`
+/**
+ * Redimensionado de fotos en el servidor de Supabase (Storage → Image transformations).
+ * Solo está disponible en los planes de pago, así que se activa con
+ * PUBLIC_SUPABASE_IMAGE_TRANSFORM=true. Sin ella se sirve la foto original.
+ */
+const imageTransforms = import.meta.env.PUBLIC_SUPABASE_IMAGE_TRANSFORM === 'true'
+
+const encodePath = (storagePath: string) => storagePath.split('/').map(encodeURIComponent).join('/')
+
+/** URL pública de una foto del bucket product-images, al ancho pedido si hay redimensionado. */
+export function productImageUrl(storagePath: string, width?: number): string {
+  if (imageTransforms && width) {
+    return `${url}/storage/v1/render/image/public/product-images/${encodePath(storagePath)}?width=${width}&quality=78`
+  }
+  return `${url}/storage/v1/object/public/product-images/${encodePath(storagePath)}`
+}
+
+/** srcset con varios anchos (o undefined sin redimensionado: el navegador usa src). */
+export function productImageSrcset(storagePath: string, widths: number[] = [400, 700, 1000, 1400]): string | undefined {
+  if (!imageTransforms) return undefined
+  return widths.map((width) => `${productImageUrl(storagePath, width)} ${width}w`).join(', ')
 }

@@ -13,13 +13,13 @@ const business = await getBusiness()
     description="Cuéntanos a nombre de quién va y cómo quieres recibirlo."
     crumbs={[{ label: 'Inicio', href: '/' }, { label: 'Carrito', href: '/carrito' }, { label: 'Pedido' }]}
   />
-  <div class="container-page py-8 lg:py-12">
+  <div class="container-page min-h-[75svh] pb-4">
     <!-- El carrito vive en el navegador (localStorage): esta parte se pinta en el cliente. -->
     <OrderForm client:only="react" businessName={business.business_name}>
       <p slot="fallback" class="py-16 text-center text-stone">Cargando…</p>
     </OrderForm>
     <noscript>
-      <p class="rounded-2xl bg-clay-soft px-4 py-3 text-sm text-clay-deep">Para usar el carrito necesitas activar JavaScript en tu navegador. También puedes escribirnos por WhatsApp.</p>
+      <p class="rounded-[2px] bg-clay-soft px-4 py-3 text-sm text-clay-deep">Para usar el carrito necesitas activar JavaScript en tu navegador. También puedes escribirnos por WhatsApp.</p>
     </noscript>
   </div>
 </MainLayout>

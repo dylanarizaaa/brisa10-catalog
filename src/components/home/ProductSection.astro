@@ -1,21 +1,24 @@
 ---
 import SectionHeading from '@/components/common/SectionHeading.astro'
+import ProductCarousel from '@/components/products/ProductCarousel.astro'
 import ProductGrid from '@/components/products/ProductGrid.astro'
 import type { ProductCard } from '@/types/product'
 
 interface Props {
+  id: string
   eyebrow: string
   title: string
   products: ProductCard[]
   href?: string
+  layout?: 'carousel' | 'grid'
   tinted?: boolean
 }
-const { eyebrow, title, products, href = '/catalogo', tinted = false } = Astro.props
+const { id, eyebrow, title, products, href = '/catalogo', layout = 'carousel', tinted = false } = Astro.props
 ---
 
-<section class:list={['py-16 sm:py-24', tinted && 'grain bg-sand/70']}>
+<section id={id} class:list={['py-24 sm:py-32', tinted && 'bg-cream']} aria-labelledby={`${id}-titulo`}>
   <div class="container-page">
-    <SectionHeading eyebrow={eyebrow} title={title} href={href} />
-    <ProductGrid products={products} reveal />
+    <SectionHeading id={`${id}-titulo`} eyebrow={eyebrow} title={title} href={href} />
+    {layout === 'carousel' ? <ProductCarousel products={products} label={title} /> : <ProductGrid products={products} reveal />}
   </div>
 </section>

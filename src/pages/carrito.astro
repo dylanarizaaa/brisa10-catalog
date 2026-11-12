@@ -11,13 +11,13 @@ import MainLayout from '@/layouts/MainLayout.astro'
     description="Revisa tu selección. Verificamos la disponibilidad antes de continuar."
     crumbs={[{ label: 'Inicio', href: '/' }, { label: 'Carrito' }]}
   />
-  <div class="container-page py-8 lg:py-12">
+  <div class="container-page min-h-[75svh] pb-4">
     <!-- El carrito vive en el navegador (localStorage): esta parte se pinta en el cliente. -->
     <CartView client:only="react">
       <p slot="fallback" class="py-16 text-center text-stone">Cargando…</p>
     </CartView>
     <noscript>
-      <p class="rounded-2xl bg-clay-soft px-4 py-3 text-sm text-clay-deep">Para usar el carrito necesitas activar JavaScript en tu navegador. También puedes escribirnos por WhatsApp.</p>
+      <p class="rounded-[2px] bg-clay-soft px-4 py-3 text-sm text-clay-deep">Para usar el carrito necesitas activar JavaScript en tu navegador. También puedes escribirnos por WhatsApp.</p>
     </noscript>
   </div>
 </MainLayout>

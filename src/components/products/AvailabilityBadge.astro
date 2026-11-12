@@ -3,10 +3,9 @@ import type { Availability } from '@/types/product'
 
 interface Props {
   availability: Availability
-  /** Sobre una foto: fondo sólido para que se lea encima de cualquier imagen. */
-  onImage?: boolean
+  class?: string
 }
-const { availability, onImage = false } = Astro.props
+const { availability, class: className } = Astro.props
 const labels: Record<Availability, string> = {
   disponible: 'Disponible',
   ultimas_unidades: 'Últimas unidades',
@@ -14,15 +13,16 @@ const labels: Record<Availability, string> = {
 }
 ---
 
+<!-- Disponibilidad en texto discreto con un punto de color (nunca el número exacto de unidades). -->
 <span
   class:list={[
-    'inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium',
-    onImage && 'shadow-soft',
-    availability === 'disponible' && 'bg-sage-soft text-sage',
-    availability === 'ultimas_unidades' && (onImage ? 'bg-cream text-clay-deep' : 'bg-clay-soft text-clay-deep'),
-    availability === 'agotado' && 'bg-ink text-cream',
+    'inline-flex items-center gap-1.5 text-xs font-medium',
+    availability === 'disponible' && 'text-sage',
+    availability === 'ultimas_unidades' && 'text-clay-deep',
+    availability === 'agotado' && 'text-stone',
+    className,
   ]}
 >
-  <span class:list={['size-1.5 rounded-full', availability === 'agotado' ? 'bg-cream/70' : 'bg-current']} aria-hidden="true"></span>
+  <span class:list={['size-1.5 rounded-full bg-current', availability === 'ultimas_unidades' && 'animate-pulse']} aria-hidden="true"></span>
   {labels[availability]}
 </span>

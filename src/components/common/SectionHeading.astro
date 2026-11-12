@@ -7,22 +7,35 @@ interface Props {
   /** Enlace "ver todo" a la derecha del título. */
   href?: string
   linkLabel?: string
+  align?: 'left' | 'center'
+  /** Para enlazar el título con su sección (aria-labelledby). */
+  id?: string
 }
-const { eyebrow, title, href, linkLabel = 'Ver todo' } = Astro.props
+const { eyebrow, title, href, linkLabel = 'Ver todo', align = 'left', id } = Astro.props
 ---
 
-<div class="mb-9 flex items-end justify-between gap-6 sm:mb-12" data-reveal>
-  <div class="flex flex-col gap-3">
+{align === 'center' ? (
+  <div class="mb-10 flex flex-col items-center gap-3 text-center sm:mb-14" data-reveal>
     {eyebrow && <p class="eyebrow">{eyebrow}</p>}
-    <h2 class="text-[2rem] leading-tight sm:text-5xl">{title}</h2>
+    <h2 id={id} class="text-[2.5rem] leading-[1.02] sm:text-[3.5rem]">{title}</h2>
+    {href && (
+      <a href={href} class="group mt-2 inline-flex items-center gap-2 text-sm font-medium">
+        <span class="link-underline">{linkLabel}</span>
+        <ArrowRight class="size-4 transition-transform duration-300 group-hover:translate-x-1" stroke-width={1.5} />
+      </a>
+    )}
   </div>
-  {href && (
-    <a href={href} class="group inline-flex min-h-11 shrink-0 items-center gap-2 text-sm font-medium text-ink">
-      <span class="link-draw hidden sm:inline">{linkLabel}</span>
-      <span class="grid size-10 place-items-center rounded-full border border-ink/25 transition-colors duration-200 group-hover:border-clay group-hover:bg-clay group-hover:text-white">
-        <ArrowRight class="size-4" />
-      </span>
-      <span class="sr-only sm:hidden">{linkLabel}</span>
-    </a>
-  )}
-</div>
+) : (
+  <div class="mb-9 flex items-end justify-between gap-6 sm:mb-12" data-reveal>
+    <div class="flex flex-col gap-3">
+      {eyebrow && <p class="eyebrow">{eyebrow}</p>}
+      <h2 id={id} class="text-[2.5rem] leading-[1.02] sm:text-[3.5rem]">{title}</h2>
+    </div>
+    {href && (
+      <a href={href} class="group mb-1.5 inline-flex shrink-0 items-center gap-2 text-sm font-medium">
+        <span class="link-underline">{linkLabel}</span>
+        <ArrowRight class="size-4 transition-transform duration-300 group-hover:translate-x-1" stroke-width={1.5} />
+      </a>
+    )}
+  </div>
+)}

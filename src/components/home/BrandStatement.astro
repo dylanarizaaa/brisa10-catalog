@@ -1,0 +1,21 @@
+---
+import { ArrowRight } from '@lucide/astro'
+import Sparkle from '@/components/common/Sparkle.astro'
+import { site } from '@/config/site'
+
+interface Props {
+  businessName: string
+}
+---
+
+<section class="container-page py-24 text-center sm:py-36" aria-label={`Sobre ${Astro.props.businessName}`}>
+  <div class="mx-auto flex max-w-4xl flex-col items-center gap-7">
+    <Sparkle class="size-5 text-clay" />
+    <p class="text-[2rem] leading-[1.12] sm:text-[3rem] lg:text-[3.5rem] font-display text-balance" data-reveal>{site.brand.statement}</p>
+    <p class="max-w-xl leading-relaxed text-stone" data-reveal style="--reveal-delay:120ms">{site.brand.detail}</p>
+    <a href="/catalogo" class="group inline-flex items-center gap-2 text-sm font-medium" data-reveal style="--reveal-delay:200ms">
+      <span class="link-underline">Conoce la colección</span>
+      <ArrowRight class="size-4 transition-transform duration-300 group-hover:translate-x-1" stroke-width={1.5} />
+    </a>
+  </div>
+</section>

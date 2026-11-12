@@ -41,9 +41,9 @@ export function AddToCart({ product, soldOut }: Props) {
 
   return (
     <div className="flex flex-col gap-3">
-      <div className="flex flex-wrap gap-3">
+      <div className="flex gap-3">
         <QuantityStepper value={quantity} onChange={setQuantity} />
-        <Button type="button" size="lg" className="flex-1" onClick={handleAdd}>
+        <Button type="button" size="lg" className="min-w-0 flex-1 px-4 sm:px-9" onClick={handleAdd}>
           <ShoppingBag />
           Agregar al carrito
         </Button>
@@ -51,8 +51,8 @@ export function AddToCart({ product, soldOut }: Props) {
 
       <div role="status" className="empty:hidden">
         {added !== null && (
-          <p className="flex animate-in items-center gap-3 rounded-2xl bg-sage-soft px-4 py-3 text-sm text-ink/85 duration-300 fade-in slide-in-from-bottom-1">
-            <span className="grid size-6 shrink-0 place-items-center rounded-full bg-sage text-cream">
+          <p className="flex animate-in items-center gap-3 rounded-[2px] bg-sage-soft px-4 py-3 text-sm text-ink/85 duration-300 fade-in slide-in-from-bottom-1">
+            <span className="grid size-6 shrink-0 place-items-center rounded-full bg-sage text-white">
               <Check className="size-3.5" strokeWidth={3} />
             </span>
             <span>
@@ -63,7 +63,7 @@ export function AddToCart({ product, soldOut }: Props) {
             </span>
           </p>
         )}
-        {full && <p className="rounded-2xl bg-clay-soft px-4 py-3 text-sm text-clay-deep">Tu carrito ya tiene el máximo de productos distintos.</p>}
+        {full && <p className="rounded-[2px] bg-clay-soft px-4 py-3 text-sm text-clay-deep">Tu carrito ya tiene el máximo de productos distintos.</p>}
       </div>
     </div>
   )

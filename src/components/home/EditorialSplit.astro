@@ -1,0 +1,60 @@
+---
+import { ArrowRight } from '@lucide/astro'
+
+interface Props {
+  image: string
+  srcset?: string
+  /** Foto pequeña superpuesta (composición editorial). */
+  detailImage?: string
+  alt: string
+  eyebrow: string
+  title: string
+  text: string
+  href: string
+  linkLabel: string
+  /** Foto a la derecha en escritorio. */
+  reverse?: boolean
+}
+const { image, srcset, detailImage, alt, eyebrow, title, text, href, linkLabel, reverse = false } = Astro.props
+---
+
+<!-- Bloque editorial: foto grande y texto corto, alternando lados para dar ritmo. -->
+<section class="container-page py-12 sm:py-20">
+  <div class:list={['grid items-center gap-10 md:grid-cols-2 md:gap-16 lg:gap-24', reverse && 'md:[&>*:first-child]:order-2']}>
+    <div class:list={['relative', detailImage && 'pb-14 sm:pb-20']}>
+      <a href={href} class="group block overflow-hidden rounded-[var(--radius-card)] bg-sand" tabindex="-1" aria-hidden="true">
+        <div data-reveal="image">
+          <img
+            src={image}
+            srcset={srcset}
+            sizes="(min-width: 768px) 50vw, 100vw"
+            alt=""
+            width="1200"
+            height="1500"
+            loading="lazy"
+            decoding="async"
+            class="aspect-[4/5] w-full object-cover"
+          />
+        </div>
+      </a>
+      {detailImage && (
+        <div
+          class:list={['absolute bottom-0 w-[42%] overflow-hidden rounded-[var(--radius-card)] border-[6px] border-paper bg-sand shadow-lift sm:border-8', reverse ? '-left-2 sm:-left-8' : '-right-2 sm:-right-8']}
+          data-reveal
+          style="--reveal-delay:220ms"
+        >
+          <img src={detailImage} alt="" width="500" height="625" loading="lazy" decoding="async" class="aspect-[4/5] w-full object-cover" />
+        </div>
+      )}
+    </div>
+    <div class="flex max-w-md flex-col items-start gap-6 md:mx-auto">
+      <p class="eyebrow" data-reveal>{eyebrow}</p>
+      <h2 class="text-[2.75rem] leading-[1] sm:text-[4rem]" data-reveal style="--reveal-delay:80ms">{title}</h2>
+      <p class="text-[1.0625rem] leading-relaxed text-stone" data-reveal style="--reveal-delay:160ms">{text}</p>
+      <a href={href} class="group mt-2 inline-flex items-center gap-2 text-sm font-medium" data-reveal style="--reveal-delay:240ms" aria-label={`${linkLabel}: ${alt}`}>
+        <span class="link-underline">{linkLabel}</span>
+        <ArrowRight class="size-4 transition-transform duration-300 group-hover:translate-x-1" stroke-width={1.5} />
+      </a>
+    </div>
+  </div>
+</section>

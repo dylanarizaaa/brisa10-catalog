@@ -7,6 +7,10 @@ interface Props {
 const { name, class: className = '' } = Astro.props
 ---
 
-<a href="/" class:list={['font-display text-2xl font-medium tracking-tight text-ink', className]} aria-label={`${name}, ir al inicio`}>
+<a
+  href="/"
+  class:list={['font-display text-[1.75rem] leading-none tracking-[-0.01em] text-ink transition-opacity duration-300 hover:opacity-70 lg:text-[2.125rem]', className]}
+  aria-label={`${name}, ir al inicio`}
+>
   {name}<span class="text-clay">.</span>
 </a>

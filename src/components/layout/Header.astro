@@ -1,115 +1,239 @@
 ---
-import { Menu, Search, ShoppingBag, X } from '@lucide/astro'
-import { navLinks } from '@/config/site'
+import { ChevronRight, Menu, Search, ShoppingBag, X } from '@lucide/astro'
+import SocialIcon from '@/components/common/SocialIcon.astro'
+import { buttonVariants } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { site } from '@/config/site'
+import { catalogUrl } from '@/lib/catalogUrl'
+import { whatsappLink } from '@/lib/whatsapp'
+import { productImageUrl } from '@/services/supabase/client'
+import type { Category } from '@/types/category'
 import Logo from './Logo.astro'
 
 interface Props {
   businessName: string
+  categories: Category[]
 }
-const { businessName } = Astro.props
-const path = Astro.url.pathname
-const isCurrent = (href: string) => (href === '/' ? path === '/' : !href.includes('#') && path.startsWith(href))
+const { businessName, categories } = Astro.props
+const { pathname, searchParams } = Astro.url
+const currentCategory = pathname === '/catalogo' ? (searchParams.get('categoria') ?? '') : null
+
+// Navegación de escritorio: todo el catálogo y cada categoría con productos publicados.
+const navItems = [
+  { href: '/catalogo', label: 'Todo', current: currentCategory === '' },
+  ...categories.slice(0, 7).map((category) => ({
+    href: catalogUrl({ categoria: category.slug }),
+    label: category.name,
+    current: currentCategory === category.slug,
+  })),
+  { href: '/#envios', label: 'Envíos', current: false },
+]
+const whatsapp = whatsappLink(`Hola ${businessName}, quiero hacer una consulta.`)
+const iconButton =
+  'grid size-11 place-items-center rounded-full text-ink transition-[background-color,transform] duration-300 hover:bg-sand active:scale-95 [&_svg]:transition-transform [&_svg]:duration-300 hover:[&_svg]:scale-110'
 ---
 
-<header class="sticky top-0 z-40 border-b border-linen/70 bg-cream/85 backdrop-blur-lg">
-  <div class="container-page flex h-16 items-center justify-between gap-4 lg:h-[4.5rem]">
-    <div class="flex items-center gap-2">
+<header class="site-header sticky top-0 z-40 border-b border-linen bg-paper/95 backdrop-blur-md" data-header>
+  <div class="container-page grid h-16 grid-cols-[1fr_auto_1fr] items-center gap-2 lg:h-20">
+    <div class="-ml-2.5 flex items-center">
+      <button type="button" popovertarget="mobile-menu" class:list={[iconButton, 'lg:hidden']} aria-label="Abrir menú">
+        <Menu class="size-5" stroke-width={1.5} />
+      </button>
       <button
         type="button"
-        popovertarget="mobile-menu"
-        class="-ml-2 grid size-11 place-items-center rounded-full transition-colors hover:bg-sand md:hidden"
-        aria-label="Abrir menú"
+        popovertarget="search-panel"
+        class="group flex h-11 items-center gap-2.5 rounded-full px-2.5 text-sm text-ink transition-colors hover:bg-sand lg:px-3.5"
+        aria-label="Buscar productos"
       >
-        <Menu class="size-5" />
+        <Search class="size-5 transition-transform duration-300 group-hover:scale-110" stroke-width={1.5} />
+        <span class="hidden text-stone lg:inline" aria-hidden="true">Buscar</span>
       </button>
-      <Logo name={businessName} />
     </div>
 
-    <nav class="hidden md:block" aria-label="Principal">
-      <ul class="flex items-center gap-8 text-[0.9375rem]">
-        {navLinks.map((link) => (
-          <li>
-            <a
-              href={link.href}
-              aria-current={isCurrent(link.href) ? 'page' : undefined}
-              class="nav-link relative py-2 text-stone transition-colors hover:text-ink aria-[current=page]:text-ink"
-            >
-              {link.label}
-            </a>
-          </li>
-        ))}
-      </ul>
-    </nav>
+    <Logo name={businessName} />
 
-    <div class="-mr-2 flex items-center">
-      <a href="/catalogo" class="grid size-11 place-items-center rounded-full transition-colors hover:bg-sand" aria-label="Buscar en el catálogo">
-        <Search class="size-5" />
-      </a>
-      <a href="/carrito" class="relative grid size-11 place-items-center rounded-full transition-colors hover:bg-sand" aria-label="Ver carrito" data-cart-link>
-        <ShoppingBag class="size-5" />
+    <div class="-mr-2.5 flex items-center justify-end gap-1">
+      {whatsapp && (
+        <a
+          href={whatsapp}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="hidden h-11 items-center gap-2 rounded-full px-3.5 text-sm text-stone transition-colors hover:bg-sand hover:text-ink lg:flex"
+        >
+          <SocialIcon name="whatsapp" class="size-[1.125rem]" />
+          Contacto
+        </a>
+      )}
+      <a href="/carrito" class:list={[iconButton, 'relative']} aria-label="Ver carrito" data-cart-link>
+        <ShoppingBag class="size-5" stroke-width={1.5} />
         <span
           data-cart-count
           hidden
           aria-hidden="true"
-          class="absolute top-1 right-0.5 grid h-[1.125rem] min-w-[1.125rem] place-items-center rounded-full bg-clay px-1 text-[0.6875rem] leading-none font-semibold text-white"
+          class="absolute top-1 right-0.5 grid h-[1.125rem] min-w-[1.125rem] place-items-center rounded-full bg-clay px-1 text-[0.625rem] leading-none font-semibold text-white"
         ></span>
       </a>
     </div>
   </div>
-</header>
 
-<!-- Menú móvil: API popover nativa, sin JavaScript. -->
-<div id="mobile-menu" popover role="dialog" aria-label="Menú" class="mobile-menu m-0 h-dvh max-h-none w-[min(20rem,85vw)] max-w-none flex-col bg-cream p-0 text-ink shadow-2xl md:hidden">
-  <div class="flex h-16 items-center justify-between border-b border-linen px-5">
-    <Logo name={businessName} />
-    <button
-      type="button"
-      popovertarget="mobile-menu"
-      popovertargetaction="hide"
-      class="-mr-2 grid size-11 place-items-center rounded-full transition-colors hover:bg-sand"
-      aria-label="Cerrar menú"
-    >
-      <X class="size-5" />
-    </button>
-  </div>
-  <nav aria-label="Menú móvil" class="flex-1 overflow-y-auto px-5 py-4">
-    <ul class="flex flex-col">
-      {navLinks.map((link) => (
-        <li class="border-b border-linen/60">
-          <a href={link.href} class="flex min-h-14 items-center font-display text-xl">{link.label}</a>
+  <nav aria-label="Categorías" class="hidden border-t border-linen/70 lg:block">
+    <ul class="container-page flex h-12 items-center justify-center gap-10 text-[0.75rem] font-medium tracking-[0.14em] uppercase">
+      {navItems.map((item) => (
+        <li>
+          <a
+            href={item.href}
+            aria-current={item.current ? 'page' : undefined}
+            class="nav-link relative py-3 text-stone transition-colors duration-300 hover:text-ink aria-[current=page]:text-ink"
+          >
+            {item.label}
+          </a>
         </li>
       ))}
-      <li>
-        <a href="/carrito" class="flex min-h-14 items-center font-display text-xl">Carrito</a>
-      </li>
     </ul>
   </nav>
+</header>
+
+<!-- Buscador: panel superior (API popover del navegador). Funciona como formulario normal. -->
+<div id="search-panel" popover role="dialog" aria-label="Buscar productos" class="search-panel m-0 w-full max-w-none border-b border-linen bg-paper p-0 text-ink shadow-lift">
+  <div class="container-page py-6 sm:py-10">
+    <div class="flex items-center justify-between">
+      <p class="eyebrow">Buscar</p>
+      <button type="button" popovertarget="search-panel" popovertargetaction="hide" class={iconButton} aria-label="Cerrar buscador">
+        <X class="size-5" stroke-width={1.5} />
+      </button>
+    </div>
+    <form action="/catalogo" method="get" role="search" class="mt-3 flex items-center gap-3 border-b border-ink pb-2 sm:gap-5">
+      <Search class="size-6 shrink-0 text-stone" stroke-width={1.25} />
+      <label for="header-search" class="sr-only">¿Qué estás buscando?</label>
+      <Input
+        id="header-search"
+        type="search"
+        name="q"
+        maxLength={80}
+        placeholder="¿Qué estás buscando?"
+        autoComplete="off"
+        enterKeyHint="search"
+        className="h-14 rounded-none border-0 bg-transparent px-0 font-display text-[1.75rem] placeholder:text-stone/60 hover:border-0 focus-visible:ring-0 sm:text-[2.5rem]"
+        data-search-input
+      />
+      <button type="submit" class={buttonVariants({ size: 'sm' })}>Buscar</button>
+    </form>
+    {categories.length > 0 && (
+      <div class="mt-7">
+        <p class="eyebrow">Explora por categoría</p>
+        <ul class="mt-3 flex flex-wrap gap-2">
+          {categories.map((category) => (
+            <li>
+              <a href={catalogUrl({ categoria: category.slug })} class="inline-flex h-10 items-center rounded-full border border-linen px-4 text-sm transition-colors hover:border-ink">
+                {category.name}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
+    )}
+  </div>
+</div>
+
+<!-- Menú móvil: panel lateral con las categorías en imágenes. -->
+<div id="mobile-menu" popover role="dialog" aria-label="Menú" class="mobile-menu m-0 h-dvh max-h-none w-[min(23rem,88vw)] max-w-none flex-col bg-paper p-0 text-ink shadow-2xl lg:hidden">
+  <div class="flex h-16 shrink-0 items-center justify-between border-b border-linen px-5">
+    <Logo name={businessName} />
+    <button type="button" popovertarget="mobile-menu" popovertargetaction="hide" class:list={[iconButton, '-mr-2.5']} aria-label="Cerrar menú">
+      <X class="size-5" stroke-width={1.5} />
+    </button>
+  </div>
+  <nav aria-label="Menú móvil" class="flex-1 overflow-y-auto px-5 py-6">
+    {categories.length > 0 && (
+      <>
+        <p class="eyebrow">Comprar por categoría</p>
+        <ul class="mt-3 flex flex-col">
+          {categories.map((category) => (
+            <li>
+              <a href={catalogUrl({ categoria: category.slug })} class="group flex items-center gap-4 border-b border-linen/70 py-3">
+                <span class="size-14 shrink-0 overflow-hidden rounded-[2px] bg-sand">
+                  {category.image_path && (
+                    <img src={productImageUrl(category.image_path, 200)} alt="" width="56" height="56" loading="lazy" decoding="async" class="size-full object-cover" />
+                  )}
+                </span>
+                <span class="flex-1">
+                  <span class="block font-display text-[1.375rem] leading-tight">{category.name}</span>
+                  <span class="text-xs text-stone">{category.product_count} {category.product_count === 1 ? 'producto' : 'productos'}</span>
+                </span>
+                <ChevronRight class="size-4 text-stone transition-transform duration-300 group-hover:translate-x-1" />
+              </a>
+            </li>
+          ))}
+        </ul>
+      </>
+    )}
+    <ul class="mt-6 flex flex-col text-[0.9375rem]">
+      {[
+        { href: '/catalogo', label: 'Todo el catálogo' },
+        { href: '/carrito', label: 'Tu carrito' },
+        { href: '/#envios', label: 'Envíos en ' + site.city },
+        { href: '/#como-comprar', label: 'Cómo comprar' },
+        { href: '#contacto', label: 'Contacto' },
+      ].map((link) => (
+        <li><a href={link.href} class="flex min-h-12 items-center">{link.label}</a></li>
+      ))}
+    </ul>
+  </nav>
+  {whatsapp && (
+    <div class="shrink-0 border-t border-linen p-5">
+      <a href={whatsapp} target="_blank" rel="noopener noreferrer" class:list={[buttonVariants({ variant: 'whatsapp' }), 'w-full']}>
+        <SocialIcon name="whatsapp" class="size-5" />
+        Escríbenos por WhatsApp
+      </a>
+    </div>
+  )}
 </div>
 
 <style>
+  .site-header {
+    transition: transform 420ms var(--ease-soft);
+  }
+  /* Al bajar se oculta para dejar ver los productos; al subir reaparece. */
+  .site-header[data-hidden='true'] {
+    transform: translateY(-100%);
+  }
+
   .nav-link::after {
     content: '';
     position: absolute;
     inset-inline: 0;
-    bottom: 0;
+    bottom: 0.5rem;
     height: 1px;
-    background: var(--color-clay);
+    background: currentColor;
     transform: scaleX(0);
-    transform-origin: left;
-    transition: transform 220ms var(--ease-soft);
+    transform-origin: right;
+    transition: transform 360ms var(--ease-soft);
   }
   .nav-link:hover::after,
   .nav-link[aria-current='page']::after {
     transform: scaleX(1);
+    transform-origin: left;
   }
 
+  .search-panel:popover-open {
+    inset: 0 0 auto 0;
+    animation: drop-in 380ms var(--ease-out-expo);
+  }
   .mobile-menu:popover-open {
     display: flex;
     inset: 0 auto 0 0;
-    animation: slide-in 260ms var(--ease-soft);
+    animation: slide-in 380ms var(--ease-out-expo);
   }
+  .search-panel::backdrop,
   .mobile-menu::backdrop {
-    background: rgb(43 38 34 / 0.45);
+    background: rgb(26 24 23 / 0.35);
+    backdrop-filter: blur(2px);
+  }
+  @keyframes drop-in {
+    from {
+      transform: translateY(-24px);
+      opacity: 0;
+    }
   }
   @keyframes slide-in {
     from {
@@ -119,7 +243,6 @@ const isCurrent = (href: string) => (href === '/' ? path === '/' : !href.include
 </style>
 
 <script>
-  // Al tocar un enlace del menú (p. ej. un ancla de la misma página) se cierra el panel.
   import { cartCount, onCartChange } from '@/lib/cart'
 
   // Contador del carrito: vive en localStorage, así que se pinta en el navegador.
@@ -142,8 +265,40 @@ const isCurrent = (href: string) => (href === '/' ? path === '/' : !href.include
   renderCartCount()
   onCartChange(renderCartCount)
 
+  // Al tocar un enlace del menú (p. ej. un ancla de la misma página) se cierra el panel.
   const menu = document.getElementById('mobile-menu')
   menu?.addEventListener('click', (event) => {
     if ((event.target as HTMLElement).closest('a')) menu.hidePopover()
   })
+
+  // Al abrir el buscador, el cursor queda listo para escribir.
+  const searchPanel = document.getElementById('search-panel')
+  searchPanel?.addEventListener('toggle', (event) => {
+    if ((event as ToggleEvent).newState === 'open') {
+      searchPanel.querySelector<HTMLInputElement>('[data-search-input]')?.focus()
+    }
+  })
+
+  // El encabezado se oculta al bajar y reaparece al subir (nunca con el foco dentro).
+  const header = document.querySelector<HTMLElement>('[data-header]')
+  let lastY = window.scrollY
+  let ticking = false
+  window.addEventListener(
+    'scroll',
+    () => {
+      if (ticking || !header) return
+      ticking = true
+      requestAnimationFrame(() => {
+        const y = window.scrollY
+        const goingDown = y > lastY + 4
+        const goingUp = y < lastY - 4
+        if (goingDown && y > 220 && !header.contains(document.activeElement)) header.dataset.hidden = 'true'
+        else if (goingUp || y <= 220) header.dataset.hidden = 'false'
+        if (goingDown || goingUp) lastY = y
+        ticking = false
+      })
+    },
+    { passive: true },
+  )
+  header?.addEventListener('focusin', () => (header.dataset.hidden = 'false'))
 </script>
